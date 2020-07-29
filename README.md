@@ -1,2 +1,2 @@
-# Molecular-Construction-Kit
-VR Molecular construction kit, usable with SenseGlove and Vive Controllers.
+# BA-PatrickGebhardt-SenseMolecule
+Bachelor thesis-construct molecules with SenseGloves
