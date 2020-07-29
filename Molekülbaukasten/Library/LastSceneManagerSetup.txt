@@ -1,0 +1,4 @@
+sceneSetups:
+- path: "Assets/Scenes/Molek\xFClbaukasten.unity"
+  isLoaded: 1
+  isActive: 1
