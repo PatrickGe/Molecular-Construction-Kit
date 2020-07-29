@@ -35,6 +35,7 @@ public class EditMode : MonoBehaviour
         {
             if (GameObject.Find("editTeil").transform.parent.name == "Molekül")
             {
+
                 applyForce(fixedAtom);
                 alreadyMoved.Clear();
                 foreach(ConnectionStatus cs in fixedAtom.getAllConPoints())
@@ -115,13 +116,13 @@ public class EditMode : MonoBehaviour
         {
             if (carbonCP.isConnected == true)
             {
-
+                //Wenn größer als Mindestabstand - direkte Verbindung zu fixedAtom
                 carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<CarbonAtom>();
                 if (carbonConnected._id != fixedAtom._id)
                 {
                     Vector3 carbonVec = carbonConnected.transform.position - atom.transform.position;
-                    targetPoint = atom.transform.position + ((standardDistance) * carbonVec.normalized);
-                    carbonConnected.transform.position += calculateForce(atom, carbonConnected) * (targetPoint - carbonConnected.transform.position);
+                    targetPoint = atom.transform.localPosition + ((standardDistance) * carbonVec.normalized);
+                    carbonConnected.transform.localPosition += calculateForce(atom, carbonConnected) * (targetPoint - carbonConnected.transform.localPosition);
                 }
                 //Scale Connections
                 distance = Vector3.Distance(atom.transform.position, carbonConnected.transform.position);
@@ -135,23 +136,28 @@ public class EditMode : MonoBehaviour
         foreach (GameObject otherGO in GameObject.FindGameObjectsWithTag("Kohlenstoff"))
         {
             CarbonAtom otherAtom = otherGO.GetComponent<CarbonAtom>();
-            distance = Vector3.Distance(atom.transform.position, otherAtom.transform.position);
+            distance = Vector3.Distance(atom.transform.localPosition, otherAtom.transform.localPosition);
+            //Wenn kleiner als Mindestabstand und fixedAtom nicht beteiligt
             if ((distance < standardDistance) && (otherAtom._id != fixedAtom._id) && (atom._id != fixedAtom._id))
             {
-                Vector3 carbonVec = otherAtom.transform.position - atom.transform.position;
-                targetPoint = atom.transform.position + ((standardDistance) * carbonVec.normalized);
-                otherAtom.transform.position += 0.5f * calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.position);
-                atom.transform.position -= 0.5f * calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.position);
-            } else if ((distance < standardDistance) && (atom._id == fixedAtom._id))
+                Vector3 carbonVec = otherAtom.transform.localPosition - atom.transform.localPosition;
+                targetPoint = atom.transform.localPosition + ((standardDistance) * carbonVec.normalized);
+                otherAtom.transform.localPosition += 0.5f * calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.localPosition);
+                atom.transform.localPosition -= 0.5f * calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.localPosition);
+            }
+            // Wenn kleiner als Mindestabstand und atom = fixedAtom
+            else if ((distance < standardDistance) && (atom._id == fixedAtom._id))
             {
-                Vector3 carbonVec = otherAtom.transform.position - atom.transform.position;
-                targetPoint = atom.transform.position + ((standardDistance) * carbonVec.normalized);
-                otherAtom.transform.position += calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.position);
-            } else if((distance < standardDistance) && (otherAtom._id == fixedAtom._id))
+                Vector3 carbonVec = otherAtom.transform.localPosition - atom.transform.localPosition;
+                targetPoint = atom.transform.localPosition + ((standardDistance) * carbonVec.normalized);
+                otherAtom.transform.localPosition += calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.localPosition);
+            }
+            // Wenn kleiner als Mindestabstand und verbundenes Atom = fixedAtom
+            else if ((distance < standardDistance) && (otherAtom._id == fixedAtom._id))
             {
-                Vector3 carbonVec = otherAtom.transform.position - atom.transform.position;
-                targetPoint = atom.transform.position + ((standardDistance) * carbonVec.normalized);
-                atom.transform.position += calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.position);
+                Vector3 carbonVec = otherAtom.transform.localPosition - atom.transform.localPosition;
+                targetPoint = atom.transform.localPosition + ((standardDistance) * carbonVec.normalized);
+                atom.transform.localPosition += calculateForce(atom, otherAtom) * (targetPoint - otherAtom.transform.localPosition);
             }
         }
         if (moveNext.Count > 0)

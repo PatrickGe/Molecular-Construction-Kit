@@ -12,7 +12,6 @@ public class GrabController : MonoBehaviour
     public CarbonAtom connectAtom = null;
     public List<CarbonAtom> m_Interactables = new List<CarbonAtom>();
     public bool isPressed = false;
-    public bool initMove = false;
     public Vector3 lastPosController;
     public Vector3 deltaPos;
     public Vector3 posDiff;
@@ -33,30 +32,7 @@ public class GrabController : MonoBehaviour
         //Down
         if (triggerklicked.GetStateDown(m_pose.inputSource))
         {
-            
-            m_currentAtom = GetNearestCarbonAtom();
-            //Null check
-            if (!m_currentAtom)
-                return;
-            // Already held, check
-            if (m_currentAtom.m_ActiveHand)
-                m_currentAtom.m_ActiveHand.Drop();
-
-            deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
-            if (m_currentAtom != null && m_currentAtom.transform.parent == null)
-            {
-                m_currentAtom.transform.position = transform.position;
-            }
-            else
-            {
-                GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
-            }
-            
-            lastRotationMolecule = GameObject.Find("Molekül").transform.rotation;
-            lastPosController = transform.position;
-            lastRotController = transform.rotation;
-            isPressed = true;
-            initMove = true;
+            Pickup();
         }
         //Up
         if (triggerklicked.GetStateUp(m_pose.inputSource))
@@ -72,12 +48,22 @@ public class GrabController : MonoBehaviour
             }
             else
             {
-                GameObject.Find("Molekül").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule ;
-                deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
-                GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
+                if(GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
+                {
+                    GameObject.Find("Molekül").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
+                    deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
+                    GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
+                } else
+                {
+                    
+                    GameObject.Find("Molekül").GetComponent<EditMode>().regroupAtoms(m_currentAtom);
+                    GameObject.Find("editTeil").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
+                    deltaPos = GameObject.Find("editTeil").transform.position - m_currentAtom.transform.position;
+                    GameObject.Find("editTeil").transform.position = transform.position + deltaPos;
+                }
+
             }
         }
-
         //Needed to connect 2 Atoms
         checkConnection();
     }
@@ -104,34 +90,35 @@ public class GrabController : MonoBehaviour
 
     public void Pickup()
     {
-        ////Get nearest Interactable
-        //m_currentAtom = GetNearestCarbonAtom();
-        ////Null check
-        //if (!m_currentAtom)
-        //    return;
-        //// Already held, check
-        //if (m_currentAtom.m_ActiveHand)
-        //    m_currentAtom.m_ActiveHand.Drop();
-        //// Position
-        //if (m_currentAtom != null && m_currentAtom.transform.parent != null)
-        //{
-        //    Vector3 localMove = -m_currentAtom.transform.localPosition;
-        //    GameObject.Find("Molekül").transform.position = m_currentAtom.transform.position;
-        //    m_currentAtom.transform.localPosition = new Vector3(0, 0, 0);
-        //    posDiff = transform.position - m_currentAtom.transform.position + localMove;
-        //    foreach (Transform t in GameObject.Find("Molekül").GetComponentInChildren<Transform>())
-        //    {
-        //        if (t != m_currentAtom)
-        //        {
-        //            t.transform.localPosition += posDiff;
-        //        }
-        //    }
-        //    //lastRotController = transform.rotation.eulerAngles;
-        //    startRot = transform.rotation.eulerAngles;
-        //}
-        //m_currentAtom.transform.position = transform.position;
-        ////Set active hand
-        //m_currentAtom.m_ActiveHand = this;
+        m_currentAtom = GetNearestCarbonAtom();
+        //Null check
+        if (!m_currentAtom)
+            return;
+        // Already held, check
+        if (m_currentAtom.m_ActiveHand)
+            m_currentAtom.m_ActiveHand.Drop();
+
+        deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
+        if (m_currentAtom != null && m_currentAtom.transform.parent == null)
+        {
+            m_currentAtom.transform.position = transform.position;
+        }
+        else
+        {
+            if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
+            {
+                GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
+            } else
+            {
+                GameObject.Find("editTeil").transform.position = transform.position + deltaPos;
+            }
+                
+        }
+
+        lastRotationMolecule = GameObject.Find("Molekül").transform.rotation;
+        lastPosController = transform.position;
+        lastRotController = transform.rotation;
+        isPressed = true;
     }
 
     public void Drop()
@@ -139,15 +126,32 @@ public class GrabController : MonoBehaviour
         // Null check
         if (!m_currentAtom)
             return;
-        // Verbindung erstellen
-        if(connectAtom != null)
+
+        if(GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true)
         {
-            if(Vector3.Distance(connectAtom.transform.position, m_currentAtom.transform.position) <= 0.25)
+            while(GameObject.Find("editTeil").transform.GetChildCount()>0)
+            {
+                GameObject.Find("editTeil").transform.GetChild(0).parent = GameObject.Find("Molekül").transform;
+            }
+            GameObject.Find("editTeil").transform.rotation = Quaternion.Euler(0, 0, 0);
+        }
+
+        // Verbindung erstellen
+        if (connectAtom != null)
+        {
+            if (Vector3.Distance(connectAtom.transform.position, m_currentAtom.transform.position) <= 0.25)
             {
                 List<CarbonAtom> senden = new List<CarbonAtom>();
                 senden.Add(connectAtom);
                 senden.Add(m_currentAtom);
-                connectAtom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
+                if(connectAtom == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
+                {
+                    connectAtom.GetComponent<Renderer>().material.color = new Color(1, 0, 0, 1);
+                } else
+                {
+                    connectAtom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
+                }
+                
                 this.GetComponentInParent<GlobalCtrl>().verbindungErstellen(senden);
             }
             connectAtom = null;
@@ -167,7 +171,7 @@ public class GrabController : MonoBehaviour
         foreach(CarbonAtom interactable in m_Interactables)
         {
             distance = (interactable.transform.position - transform.position).sqrMagnitude;
-            if(distance < minDistance)
+            if(distance < minDistance && interactable != GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
             {
                 minDistance = distance;
                 nearest = interactable;
@@ -185,10 +189,9 @@ public class GrabController : MonoBehaviour
         foreach(CarbonAtom atom in ctrl)
         {
             float distance = Vector3.Distance(atom.transform.position, m_currentAtom.transform.position);
-
-            if (distance<= 0.25)
+            if (distance <= 0.25)
             {
-                if(atom != m_currentAtom)
+                if (atom != m_currentAtom)
                 {
                     bool connect1 = false;
                     bool connect2 = false;
@@ -202,12 +205,12 @@ public class GrabController : MonoBehaviour
                         if (con.isConnected == false)
                             connect2 = true;
                     }
-                    
+
                     if (connect1 && connect2)
                     {
                         if (connectAtom != null)
                         {
-                            if(connectAtom != atom)
+                            if (connectAtom != atom)
                             {
                                 connectAtom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
                             }
@@ -215,9 +218,14 @@ public class GrabController : MonoBehaviour
                         atom.GetComponent<Renderer>().material.color = new Color(0, 1, 0, 1);
                         connectAtom = atom;
                     }
-                }  
-            } else {
-                atom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
+                }
+            }
+            else
+            {
+                if (atom != GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
+                {
+                    atom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
+                }
             }
         }
     }

@@ -123,9 +123,6 @@ namespace Valve.VR.Extras
                 }
                 else if (hit.collider.name == "recycle bin" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
-                    print(GameObject.Find("Molekül"));
-                    print(GameObject.Find("Molekül").GetComponent<EditMode>());
-                    print(GameObject.Find("Molekül").GetComponent<EditMode>().editMode);
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     this.GetComponentInParent<GlobalCtrl>().recycle();
                 }
