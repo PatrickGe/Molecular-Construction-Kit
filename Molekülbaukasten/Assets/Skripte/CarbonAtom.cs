@@ -18,6 +18,14 @@ public class CarbonAtom : MonoBehaviour
     public ConnectionStatus c2;
     public ConnectionStatus c3;
 
+    public float c0c1;
+    public float c0c2;
+    public float c0c3;
+    public float c1c2;
+    public float c1c3;
+    public float c2c3;
+
+    private List<CarbonAtom> allCarbonAtoms = new List<CarbonAtom>();
 
     public void f_Init(int id)
     {
@@ -35,6 +43,25 @@ public class CarbonAtom : MonoBehaviour
         this.c3.transform.localPosition = r2Pos.normalized * transform.localScale.x * 3.5f;
         
     }
+
+    public float getAngle(ConnectionStatus cx , ConnectionStatus cy)
+    {
+        if ((cx == c0 && cy == c1) || (cy == c0 && cx == c1))
+            return c0c1;
+        else if ((cx == c0 && cy == c2) || (cy == c0 && cx == c2))
+            return c0c2;
+        else if ((cx == c0 && cy == c3) || (cy == c0 && cx == c3))
+            return c0c3;
+        else if ((cx == c1 && cy == c2) || (cy == c1 && cx == c2))
+            return c1c2;
+        else if ((cx == c1 && cy == c3) || (cy == c1 && cx == c3))
+            return c1c3;
+        else if ((cx == c2 && cy == c3) || (cy == c2 && cx == c3))
+            return c2c3;
+        else
+            return -1.0f;     
+    }
+
     public ConnectionStatus getConPoint(int i)
     {
         if (i == 0)
@@ -72,5 +99,30 @@ public class CarbonAtom : MonoBehaviour
             isFull = true;
         else
             isFull = false;
+
+        allCarbonAtoms = GameObject.Find("Camera").GetComponent<GlobalCtrl>().list_curCarbonAtoms;
+        
+        if (this.c0.isConnected && this.c1.isConnected)
+            c0c1 = Vector3.Angle(allCarbonAtoms.Find(p => p._id == c0.otherAtomID).transform.localPosition - this.transform.localPosition, allCarbonAtoms.Find(p => p._id == c1.otherAtomID).transform.localPosition - this.transform.localPosition);
+
+        if(this.c0.isConnected && this.c2.isConnected)
+            c0c2 = Vector3.Angle(allCarbonAtoms.Find(p => p._id == c0.otherAtomID).transform.localPosition - this.transform.localPosition, allCarbonAtoms.Find(p => p._id == c2.otherAtomID).transform.localPosition - this.transform.localPosition);
+
+        if (this.c0.isConnected && this.c3.isConnected)
+            c0c3 = Vector3.Angle(allCarbonAtoms.Find(p => p._id == c0.otherAtomID).transform.localPosition - this.transform.localPosition, allCarbonAtoms.Find(p => p._id == c3.otherAtomID).transform.localPosition - this.transform.localPosition);
+
+        if (this.c1.isConnected && this.c2.isConnected)
+            c1c2 = Vector3.Angle(allCarbonAtoms.Find(p => p._id == c1.otherAtomID).transform.localPosition - this.transform.localPosition, allCarbonAtoms.Find(p => p._id == c2.otherAtomID).transform.localPosition - this.transform.localPosition);
+
+        if (this.c1.isConnected && this.c3.isConnected)
+            c1c3 = Vector3.Angle(allCarbonAtoms.Find(p => p._id == c1.otherAtomID).transform.localPosition - this.transform.localPosition, allCarbonAtoms.Find(p => p._id == c3.otherAtomID).transform.localPosition - this.transform.localPosition);
+
+        if (this.c2.isConnected && this.c3.isConnected)
+            c2c3 = Vector3.Angle(allCarbonAtoms.Find(p => p._id == c2.otherAtomID).transform.localPosition - this.transform.localPosition, allCarbonAtoms.Find(p => p._id == c3.otherAtomID).transform.localPosition - this.transform.localPosition);
+
+        //if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode)
+        //{
+        //    print(this + "  " + c0c1 + "  " + c0c2 + "  " + c0c3 + "  " + c1c2 + "  " + c1c3 + "  " + c2c3);
+        //}
     }
 }

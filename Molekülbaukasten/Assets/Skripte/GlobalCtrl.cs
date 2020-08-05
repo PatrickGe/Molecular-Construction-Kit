@@ -224,8 +224,8 @@ public class GlobalCtrl : MonoBehaviour
                 Vector3 newPos = posOld + (c.transform.localPosition - posOld)* 0.5f;
                 print(c);
                 print("alt: " + posOld);
-                print("jetzt: " + c.transform.localPosition);
-               
+                print("neu: " + c.transform.localPosition);
+                
                 atomMap[c._id] = newPos;
                 print("mittel: " + atomMap[c._id]);
             }
@@ -436,6 +436,7 @@ public class GlobalCtrl : MonoBehaviour
             {
                 Destroy(con);
             }
+            atomMap.Clear();
         } else
         {
             CarbonAtom fixedAtom = GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom;
@@ -457,7 +458,7 @@ public class GlobalCtrl : MonoBehaviour
             }
             Destroy(fixedAtom.gameObject);
             list_curCarbonAtoms.Remove(fixedAtom);
-
+            atomMap.Remove(fixedAtom._id);
         }
     }
 }
