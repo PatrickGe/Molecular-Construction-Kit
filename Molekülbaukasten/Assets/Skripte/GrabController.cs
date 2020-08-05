@@ -56,10 +56,12 @@ public class GrabController : MonoBehaviour
                 } else
                 {
                     
-                    GameObject.Find("Molekül").GetComponent<EditMode>().regroupAtoms(m_currentAtom);
-                    GameObject.Find("editTeil").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
-                    deltaPos = GameObject.Find("editTeil").transform.position - m_currentAtom.transform.position;
-                    GameObject.Find("editTeil").transform.position = transform.position + deltaPos;
+                    //GameObject.Find("Molekül").GetComponent<EditMode>().regroupAtoms(m_currentAtom);
+                    //GameObject.Find("editTeil").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
+                    //deltaPos = GameObject.Find("editTeil").transform.position - m_currentAtom.transform.position;
+                    //GameObject.Find("editTeil").transform.position = transform.position + deltaPos;
+
+                    m_currentAtom.transform.position = transform.position;
                 }
 
             }
@@ -110,7 +112,8 @@ public class GrabController : MonoBehaviour
                 GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
             } else
             {
-                GameObject.Find("editTeil").transform.position = transform.position + deltaPos;
+                //GameObject.Find("editTeil").transform.position = transform.position + deltaPos;
+                m_currentAtom.transform.position = transform.position + deltaPos;
             }
                 
         }
@@ -153,6 +156,7 @@ public class GrabController : MonoBehaviour
                 }
                 
                 this.GetComponentInParent<GlobalCtrl>().verbindungErstellen(senden);
+                senden.Clear();
             }
             connectAtom = null;
         }

@@ -23,6 +23,9 @@ public class EditMode : MonoBehaviour
     float constantForceFormula = 1f;
     public Queue<int> moveNext = new Queue<int>();
     public List<int> alreadyMoved = new List<int>();
+
+    private List<CarbonAtom> allCarbonAtoms = new List<CarbonAtom>();
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -33,11 +36,13 @@ public class EditMode : MonoBehaviour
     {
         if (editMode == true)
         {
-            if (GameObject.Find("editTeil").transform.parent.name == "Molekül")
+            if (/*GameObject.Find("editTeil").transform.parent.name == "Molekül"*/true)
             {
-
-                applyForce(fixedAtom);
+                allCarbonAtoms = GameObject.Find("Camera").GetComponent<GlobalCtrl>().list_curCarbonAtoms;
+                forceField();
+                //applyForce(fixedAtom);
                 alreadyMoved.Clear();
+                
                 foreach(ConnectionStatus cs in fixedAtom.getAllConPoints())
                 {
                     if (cs.isConnected == true)
@@ -100,6 +105,45 @@ public class EditMode : MonoBehaviour
         }
     }
 
+    public void forceField()
+    {        
+        foreach(CarbonAtom atom in allCarbonAtoms)
+        {
+            if(GameObject.Find("Camera").GetComponent<GlobalCtrl>().atomMap.TryGetValue(atom._id, out Vector3 goal))
+            {
+                Vector3 move = goal - atom.transform.localPosition;
+                atom.transform.localPosition += move * 0.05f;
+            }
+            
+
+            foreach(ConnectionStatus carbonCP in atom.getAllConPoints())
+            {
+                if (carbonCP.isConnected)
+                {
+                    carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<CarbonAtom>();
+
+                    distance = Vector3.Distance(atom.transform.position, carbonConnected.transform.position);
+                    distanceDiff = distance - standardDistance;
+                    Transform connection = GameObject.Find("con" + carbonCP.conID).transform;
+                    connection.localScale = new Vector3(connection.localScale.x, connection.localScale.y, standardScale + (distanceDiff * 2.5f));
+                    connection.transform.position = atom.transform.position;
+                    connection.transform.LookAt(carbonConnected.transform.position);
+                    //if(carbonConnected != fixedAtom)
+                    //{
+
+
+                    //    Vector3 endPos = atom.transform.localPosition + Quaternion.Euler(atom.transform.rotation.eulerAngles) * carbonCP.transform.localPosition.normalized * standardDistance;
+                    //    //Vector3 endPos = atom.transform.position + Quaternion.Euler(atom.transform.rotation.eulerAngles) * ((carbonCP.transform.localPosition / carbonCP.transform.parent.localScale.x) * 0.1f);
+                    //    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    //    cube.transform.parent = GameObject.Find("Molekül").transform;
+                    //    cube.transform.localPosition = endPos;
+                    //    cube.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                    //}
+                }
+            }
+        }
+    }
+
     public void applyForce(CarbonAtom atom)
     {
         //Einzelne Atome rekursiv aufrufen. Startpunkt: FixedAtom, von da aus über jedes Child die angrenzenden Atome mit force bewegen.
@@ -120,7 +164,7 @@ public class EditMode : MonoBehaviour
                 carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<CarbonAtom>();
                 if (carbonConnected._id != fixedAtom._id)
                 {
-                    Vector3 carbonVec = carbonConnected.transform.position - atom.transform.position;
+                    Vector3 carbonVec = carbonConnected.transform.localPosition - atom.transform.localPosition;
                     targetPoint = atom.transform.localPosition + ((standardDistance) * carbonVec.normalized);
                     carbonConnected.transform.localPosition += calculateForce(atom, carbonConnected) * (targetPoint - carbonConnected.transform.localPosition);
                 }

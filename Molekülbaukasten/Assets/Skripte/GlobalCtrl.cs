@@ -62,8 +62,9 @@ public class GlobalCtrl : MonoBehaviour
     public float scale;
     public float winkelDiff;
 
+    public Dictionary<int, Vector3> atomMap = new Dictionary<int, Vector3>();
 
-
+    float standardDistance = 0.35f;
 
     // Start is called before the first frame update
     void Start()
@@ -166,7 +167,7 @@ public class GlobalCtrl : MonoBehaviour
         // Neu hinzugefügtes Atom zu gewähltem Vektor rotieren, Kind als connected anzeigen.
         childGrabbedSelected.isConnected = true;
         childSelected.isConnected = true;
-        if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
+        if (/*GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false*/true)
         {
             senden[1].transform.position = senden[0].transform.position + Quaternion.Euler(senden[0].transform.rotation.eulerAngles) * ((childSelected.transform.localPosition / childSelected.transform.parent.localScale.x) * scale);
             Vector3 direction = childSelected.transform.position - senden[1].transform.position;
@@ -193,6 +194,9 @@ public class GlobalCtrl : MonoBehaviour
         int.TryParse(childGrabbedSelected.name, out childSelected.otherPointID);
         int.TryParse(childSelected.name, out childGrabbedSelected.otherPointID);
 
+        addToMap(senden[0], senden[1]);
+        addToMap(senden[1], senden[1]);
+
         childGrabbedSelected = null;
         childSelected = null;
         //Alle Atome und deren Abstände zu den Nachbarn berechnen
@@ -202,6 +206,30 @@ public class GlobalCtrl : MonoBehaviour
             {
                 position[i, j] = list_curCarbonAtoms[j].transform.position - list_curCarbonAtoms[i].transform.position;
             }
+        }
+    }
+
+    public void addToMap(CarbonAtom c, CarbonAtom cGrabbed)
+    {
+        //Wenn Wert noch nicht enthalten ist
+        if(!atomMap.TryGetValue(c._id, out Vector3 pos))
+        {
+            atomMap.Add(c._id, c.transform.localPosition);
+        }
+        //Wenn er schon enthalten ist
+        else
+        {
+            if(atomMap.TryGetValue(c._id, out Vector3 posOld) && c == cGrabbed)
+            {
+                Vector3 newPos = posOld + (c.transform.localPosition - posOld)* 0.5f;
+                print(c);
+                print("alt: " + posOld);
+                print("jetzt: " + c.transform.localPosition);
+               
+                atomMap[c._id] = newPos;
+                print("mittel: " + atomMap[c._id]);
+            }
+
         }
     }
 
