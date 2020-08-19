@@ -251,6 +251,7 @@
     <Compile Include="Assets\Skripte\CFileHelper.cs" />
     <Compile Include="Assets\Skripte\ConnectionStatus.cs" />
     <Compile Include="Assets\Skripte\EditMode.cs" />
+    <Compile Include="Assets\Skripte\ForceField.cs" />
     <Compile Include="Assets\Skripte\GestenErkennung.cs" />
     <Compile Include="Assets\Skripte\GlobalCtrl.cs" />
     <Compile Include="Assets\Skripte\GrabController.cs" />

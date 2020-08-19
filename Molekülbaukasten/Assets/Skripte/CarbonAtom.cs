@@ -18,6 +18,10 @@ public class CarbonAtom : MonoBehaviour
     public ConnectionStatus c2;
     public ConnectionStatus c3;
 
+    //optimal distance and bond force const.
+    public float r0;
+    public float kb;
+
     public float c0c1;
     public float c0c2;
     public float c0c3;
