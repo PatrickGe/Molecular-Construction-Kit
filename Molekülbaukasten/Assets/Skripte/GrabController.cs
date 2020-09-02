@@ -48,7 +48,7 @@ public class GrabController : MonoBehaviour
             }
             else
             {
-                if(GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
+                if(this.GetComponentInParent<GlobalCtrl>().allAtom/*GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false*/)
                 {
                     GameObject.Find("Molekül").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
                     deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
@@ -107,7 +107,7 @@ public class GrabController : MonoBehaviour
         }
         else
         {
-            if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
+            if (this.GetComponentInParent<GlobalCtrl>().allAtom/*GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false*/)
             {
                 GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
             } else

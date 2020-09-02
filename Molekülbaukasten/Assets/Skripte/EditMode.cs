@@ -39,8 +39,8 @@ public class EditMode : MonoBehaviour
             if (/*GameObject.Find("editTeil").transform.parent.name == "Molekül"*/true)
             {
                 allCarbonAtoms = GameObject.Find("Camera").GetComponent<GlobalCtrl>().list_curCarbonAtoms;
-                forceField();
-                //applyForce(fixedAtom);
+                //forceField();
+                applyForce(fixedAtom);
                 alreadyMoved.Clear();
                 
                 foreach(ConnectionStatus cs in fixedAtom.getAllConPoints())

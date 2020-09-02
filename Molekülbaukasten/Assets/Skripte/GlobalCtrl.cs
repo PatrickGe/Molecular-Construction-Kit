@@ -61,6 +61,8 @@ public class GlobalCtrl : MonoBehaviour
     public ConnectionStatus childGrabbedSelected;
     public float scale;
     public float winkelDiff;
+    public bool allAtom = true;
+    public bool forceField = false;
 
     public Dictionary<int, Vector3> atomMap = new Dictionary<int, Vector3>();
 
@@ -130,7 +132,6 @@ public class GlobalCtrl : MonoBehaviour
         _id += 1;
         GameObject kohlenstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
         kohlenstoffatom.GetComponent<CarbonAtom>().f_Init(_id);
-        
         kohlenstoffatom.transform.position = pos + new Vector3(0, 0, 0.2f);
         list_curCarbonAtoms.Add(kohlenstoffatom.GetComponent<CarbonAtom>());
     }
@@ -194,8 +195,8 @@ public class GlobalCtrl : MonoBehaviour
         int.TryParse(childGrabbedSelected.name, out childSelected.otherPointID);
         int.TryParse(childSelected.name, out childGrabbedSelected.otherPointID);
 
-        addToMap(senden[0], senden[1]);
-        addToMap(senden[1], senden[1]);
+        //addToMap(senden[0], senden[1]);
+        //addToMap(senden[1], senden[1]);
 
         childGrabbedSelected = null;
         childSelected = null;

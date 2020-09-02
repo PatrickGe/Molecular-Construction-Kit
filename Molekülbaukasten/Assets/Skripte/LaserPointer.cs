@@ -145,7 +145,30 @@ namespace Valve.VR.Extras
                         hit.collider.gameObject.GetComponent<Renderer>().material.color = new Color32(0, 0, 0, 255);
                     }
                 }
-
+                else if((hit.collider.name == "AllAtoms") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                {
+                    GameObject.Find("AllAtoms").transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                    GameObject.Find("SingleAtom").transform.localScale = new Vector3(0.07f, 0.1f, 0.07f);
+                    this.GetComponentInParent<GlobalCtrl>().allAtom = true;
+                }
+                else if ((hit.collider.name == "SingleAtom") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                {
+                    GameObject.Find("AllAtoms").transform.localScale = new Vector3(0.07f, 0.1f, 0.07f);
+                    GameObject.Find("SingleAtom").transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+                    this.GetComponentInParent<GlobalCtrl>().allAtom = false;
+                }
+                else if ((hit.collider.name == "ButtonOFF") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                {
+                    GameObject.Find("ButtonON").transform.localPosition = new Vector3(4.75f, 1.6f, 6.5f);
+                    GameObject.Find("ButtonOFF").transform.localPosition = new Vector3(4.775f, 1.6f, 6.53f);
+                    this.GetComponentInParent<GlobalCtrl>().forceField = true;
+                }
+                else if ((hit.collider.name == "ButtonON") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                {
+                    GameObject.Find("ButtonOFF").transform.localPosition = new Vector3(4.75f, 1.6f, 6.5f);
+                    GameObject.Find("ButtonON").transform.localPosition = new Vector3(4.775f, 1.6f, 6.53f);
+                    this.GetComponentInParent<GlobalCtrl>().forceField = false;
+                }
             }
         }
     }
