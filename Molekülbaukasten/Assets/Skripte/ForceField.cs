@@ -9,7 +9,7 @@ public class ForceField : MonoBehaviour
     float kb = 1.0f;
     float ka = 1.0f;
     float standardDistance = 0.35f;
-    float alphaNull = 1;
+    float alphaNull = 109.4712f;
     // Start is called before the first frame update
     void Start()
     {
@@ -58,7 +58,7 @@ public class ForceField : MonoBehaviour
                                 {
                                     angleList.Add(new Vector3(vec.y, c2._id, c1._id));
                                 }
-                                else if (vec.y == c2._id)
+                                else if (vec.y == c1._id)
                                 {
                                     angleList.Add(new Vector3(vec.x, c1._id, c2._id));
                                 }
@@ -115,15 +115,23 @@ public class ForceField : MonoBehaviour
         Vector3 rb2 = getAtomByID(angle.z).transform.localPosition - getAtomByID(angle.y).transform.localPosition;
 
         float cosAlpha = (Vector3.Dot(rb1, rb2)) / (Vector3.Magnitude(rb1) * Vector3.Magnitude(rb2));
-        float mAlpha = -ka * (Mathf.Acos(cosAlpha) - alphaNull) ;
+        print(cosAlpha);
+        print(Mathf.Acos(cosAlpha) * (180 / Mathf.PI));
+        float mAlpha = -ka * (Mathf.Acos(cosAlpha) * (180 / Mathf.PI) - alphaNull) ;
 
         Vector3 fI = (mAlpha / (Vector3.Magnitude(rb1) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb1 / Vector3.Magnitude(rb1)) - cosAlpha*(rb2 / Vector3.Magnitude(rb2)));
         Vector3 fK = (mAlpha / (Vector3.Magnitude(rb2) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb2 / Vector3.Magnitude(rb2)) - cosAlpha * (rb1 / Vector3.Magnitude(rb1)));
         Vector3 fJ = -fI - fK;
 
-        print("fI: " + fI);
-        print("fK: " + fK);
-        print("fJ: " + fJ);
+        if(Mathf.Acos(cosAlpha) != 180 && Mathf.Acos(cosAlpha) != 0)
+        {
+            getAtomByID(angle.x).transform.localPosition += fI * 0.07f;
+            getAtomByID(angle.y).transform.localPosition += fK * 0.07f;
+            getAtomByID(angle.z).transform.localPosition += fJ * 0.07f;
+        }
+        print("fI: " + fI * 0.07f);
+        print("fK: " + fK * 0.07f);
+        print("fJ: " + fJ * 0.07f);
     }
 
 
