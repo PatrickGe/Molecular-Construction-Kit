@@ -107,12 +107,11 @@ public class GrabController : MonoBehaviour
         }
         else
         {
-            if (this.GetComponentInParent<GlobalCtrl>().allAtom/*GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false*/)
+            if (this.GetComponentInParent<GlobalCtrl>().allAtom)
             {
                 GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
             } else
             {
-                //GameObject.Find("editTeil").transform.position = transform.position + deltaPos;
                 m_currentAtom.transform.position = transform.position + deltaPos;
             }
                 
@@ -195,7 +194,13 @@ public class GrabController : MonoBehaviour
             float distance = Vector3.Distance(atom.transform.position, m_currentAtom.transform.position);
             if (distance <= 0.25)
             {
-                if (atom != m_currentAtom)
+                bool alreadyConnected = false;
+                foreach(ConnectionStatus cs in atom.getAllConPoints())
+                {
+                    if (cs.otherAtomID == m_currentAtom._id)
+                        alreadyConnected = true;
+                }
+                if (atom != m_currentAtom && alreadyConnected == false)
                 {
                     bool connect1 = false;
                     bool connect2 = false;
