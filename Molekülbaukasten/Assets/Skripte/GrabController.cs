@@ -129,14 +129,14 @@ public class GrabController : MonoBehaviour
         if (!m_currentAtom)
             return;
 
-        if(GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true)
-        {
-            while(GameObject.Find("editTeil").transform.GetChildCount()>0)
-            {
-                GameObject.Find("editTeil").transform.GetChild(0).parent = GameObject.Find("Molekül").transform;
-            }
-            GameObject.Find("editTeil").transform.rotation = Quaternion.Euler(0, 0, 0);
-        }
+        //if(GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true)
+        //{
+        //    while(GameObject.Find("editTeil").transform.GetChildCount()>0)
+        //    {
+        //        GameObject.Find("editTeil").transform.GetChild(0).parent = GameObject.Find("Molekül").transform;
+        //    }
+        //    GameObject.Find("editTeil").transform.rotation = Quaternion.Euler(0, 0, 0);
+        //}
 
         // Verbindung erstellen
         if (connectAtom != null)
@@ -174,7 +174,7 @@ public class GrabController : MonoBehaviour
         foreach(CarbonAtom interactable in m_Interactables)
         {
             distance = (interactable.transform.position - transform.position).sqrMagnitude;
-            if(distance < minDistance && interactable != GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
+            if(distance < minDistance /*&& interactable != GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom*/)
             {
                 minDistance = distance;
                 nearest = interactable;

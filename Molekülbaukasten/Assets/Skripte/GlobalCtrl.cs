@@ -210,42 +210,6 @@ public class GlobalCtrl : MonoBehaviour
         }
     }
 
-    public void addToMap(CarbonAtom c, CarbonAtom cGrabbed)
-    {
-        //Wenn Wert noch nicht enthalten ist
-        if(!atomMap.TryGetValue(c._id, out Vector3 pos))
-        {
-            atomMap.Add(c._id, c.transform.localPosition);
-        }
-        //Wenn er schon enthalten ist
-        else
-        {
-            if(atomMap.TryGetValue(c._id, out Vector3 posOld) && c == cGrabbed)
-            {
-                Vector3 newPos = posOld + (c.transform.localPosition - posOld)* 0.5f;
-                print(c);
-                print("alt: " + posOld);
-                print("neu: " + c.transform.localPosition);
-                
-                atomMap[c._id] = newPos;
-                print("mittel: " + atomMap[c._id]);
-            }
-
-        }
-    }
-
-    public Vector3[,] positionVector
-    {
-        get
-        {
-            return position;
-        }
-        set
-        {
-            position = value;
-        }
-    }
-
     public List<atomData> saveMolecule()
     {
         foreach (CarbonAtom child in molecule.GetComponentsInChildren<CarbonAtom>())
@@ -310,7 +274,7 @@ public class GlobalCtrl : MonoBehaviour
             }
         }
 
-
+        int tempID = 0;
         foreach (CarbonAtom atom in list_curCarbonAtoms)
         {
             foreach (ConnectionStatus cp in atom.getAllConPoints())
@@ -335,23 +299,22 @@ public class GlobalCtrl : MonoBehaviour
                         cp.gameObject.SetActive(false);
                         otherCP.gameObject.SetActive(false);
                     }
-
-
                 }
                 if (atom.c0.isConnected == true && atom.c1.isConnected == true && atom.c2.isConnected == true && atom.c3.isConnected == true)
                 {
                     atom.isFull = true;
                 }
-
+            }
+            if(atom._id > tempID)
+            {
+                tempID = atom._id;
             }
         }
-
-
+        _id = tempID;
     }
 
     public void loadGUILoad()
     {
-
         open.Clear();
         //get all Paths of the XML Files
         foreach (FileInfo file in info)

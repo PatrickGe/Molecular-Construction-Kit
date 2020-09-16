@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace Valve.VR.Extras
 {
@@ -18,7 +20,7 @@ namespace Valve.VR.Extras
         public Object[] allGameObjects;
         public GameObject guiSave;
         public GameObject guiLoad;
-
+        public GameObject molecule;
 
         private void Start()
         {
@@ -66,6 +68,10 @@ namespace Valve.VR.Extras
                 if (obj.name == "GUILoad")
                 {
                     guiLoad = obj;
+                }
+                if (obj.name == "Molekül")
+                {
+                    molecule = obj;
                 }
             }
         }
@@ -168,6 +174,34 @@ namespace Valve.VR.Extras
                     GameObject.Find("ButtonOFF").transform.localPosition = new Vector3(4.75f, 1.6f, 6.5f);
                     GameObject.Find("ButtonON").transform.localPosition = new Vector3(4.775f, 1.6f, 6.53f);
                     this.GetComponentInParent<GlobalCtrl>().forceField = false;
+                }
+                else if(hit.collider.transform.parent != null && hit.collider.transform.parent.name == "Tastatur")
+                {
+                    GlobalCtrl text = this.transform.root.GetComponent<GlobalCtrl>();
+                    text.textChange(hit.collider.gameObject);
+                }
+                else if (hit.collider.transform.parent != null && hit.collider.transform.parent.name == "GUILoad")
+                {
+                    if(hit.collider.name == "Down")
+                    {
+                        GlobalCtrl.updown += 1;
+                    }
+                    else if(hit.collider.name == "Up" && GlobalCtrl.updown >= 1)
+                    {
+                        GlobalCtrl.updown -= 1;
+                    }
+                    else if (hit.collider.name.StartsWith("Platz"))
+                    {
+                        List<atomData> loadFile = new List<atomData>();
+                        loadFile = (List<atomData>)CFileHelper.LoadData(Application.dataPath + "/MoleculeFiles/" + hit.collider.transform.GetChild(0).GetComponent<Text>().text, typeof(List<atomData>));
+                        this.transform.root.GetComponent<GlobalCtrl>().loadMolecule(loadFile);
+                    }
+                    else if(hit.collider.name == "ExitLoadGui")
+                    {
+                        GlobalCtrl.loadGUI = false;
+                        GameObject.Find("GUILoad").SetActive(false);
+                        molecule.SetActive(true);
+                    }
                 }
             }
         }
