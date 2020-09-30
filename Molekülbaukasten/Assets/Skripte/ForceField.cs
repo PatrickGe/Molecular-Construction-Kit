@@ -13,7 +13,6 @@ public class ForceField : MonoBehaviour
     float standardDistance = 0.35f;
     float alphaNull = 109.4712f;
 
-    Vector3 test;
     // Start is called before the first frame update
     void Start()
     {
@@ -23,13 +22,17 @@ public class ForceField : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        test = new Vector3(0, 0, 0);
+        // Wenn das Kraftfeld aktiv ist, sämtliche Bindungen und Kräfte updaten,
+        // sonst nur Bindungen aktualisieren
         if (this.GetComponent<GlobalCtrl>().forceField)
         {
             bondList.Clear();
             angleList.Clear();
             generateLists();
             forces();
+            scaleConnections();
+        } else
+        {
             scaleConnections();
         }
         
@@ -93,6 +96,8 @@ public class ForceField : MonoBehaviour
         }
     }
 
+    // Für alle Bindungen in den jeweiligen Listen werden die Kräfte berechnet,
+    // am Ende wird die Methode zum Aktualisieren der Position aufgerufen.
     void forces()
     {
         //Loop Bond List
@@ -110,6 +115,7 @@ public class ForceField : MonoBehaviour
         applyForces();
     }
 
+    // Berechnet Bindungskräfte
     void calcBondForces(Vector2 bond)
     {
         
@@ -125,6 +131,7 @@ public class ForceField : MonoBehaviour
         movement[(int)bond.y] += fc2 * 0.07f;
     }
 
+    // Berechnet Winkelkräfte
     void calcAngleForces(Vector3 angle)
     {
         Vector3 rb1 = getAtomByID(angle.x).transform.localPosition - getAtomByID(angle.y).transform.localPosition;
@@ -137,34 +144,46 @@ public class ForceField : MonoBehaviour
         Vector3 fI = (mAlpha / (Vector3.Magnitude(rb1) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb1 / Vector3.Magnitude(rb1)) - cosAlpha*(rb2 / Vector3.Magnitude(rb2)));
         Vector3 fK = (mAlpha / (Vector3.Magnitude(rb2) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb2 / Vector3.Magnitude(rb2)) - cosAlpha * (rb1 / Vector3.Magnitude(rb1)));
         Vector3 fJ = -fI - fK;
-
-        //Winkelkräfte viel zu stark, sobald mehrere Atome darauf einwirken, evtl normalisieren oder weiter verkleinern?
-        if((angleAlpha <= 170.0f || angleAlpha >= 190.0f) && (angleAlpha >= 5.0f))
+        float angleFactor = 0.001f;
+        // Winkelkräfte viel zu stark, sobald mehrere Atome darauf einwirken, evtl normalisieren oder weiter verkleinern?
+        if ((angleAlpha <= 170.0f || angleAlpha >= 190.0f) && (angleAlpha >= 5.0f))
         {
-            movement[(int)angle.x] += fI * 0.0007f;
-            movement[(int)angle.y] += fK * 0.0007f;
-            movement[(int)angle.z] += fJ * 0.0007f;
+            movement[(int)angle.x] += fI * 0.07f * angleFactor;
+            movement[(int)angle.y] += fK * 0.07f * angleFactor;
+            movement[(int)angle.z] += fJ * 0.07f * angleFactor;
         }
-        
-        print("fI: " + fI * 0.0007f);
-        print("fK: " + fK * 0.0007f);
-        print("fJ: " + fJ * 0.0007f);
+        // else
+        //{
+        //    float lineX = Mathf.Abs(getAtomByID(angle.x).transform.localPosition.x - getAtomByID(angle.z).transform.localPosition.x);
+        //    float lineY = Mathf.Abs(getAtomByID(angle.x).transform.localPosition.y - getAtomByID(angle.z).transform.localPosition.y);
+        //    float lineZ = Mathf.Abs(getAtomByID(angle.x).transform.localPosition.z - getAtomByID(angle.z).transform.localPosition.z);
 
-        //Map erstellen Key: Atom ID Value: bondVector + angleVector
-        //Am Ende in applyForces() alle Kräfte zu Bewegungen machen
+        //    if (lineX <= lineY && lineX <= lineZ)
+        //    {
+        //        movement[(int)angle.x] = new Vector3(0.1f, 0, 0);
+        //    }
+        //    else if (lineY < lineX && lineY < lineZ)
+        //    {
+        //        movement[(int)angle.x] = new Vector3(0, 0.1f, 0);
+        //    }
+        //    else if (lineZ < lineX && lineZ < lineY)
+        //    {
+        //        movement[(int)angle.x] = new Vector3(0, 0, 0.1f);
+        //    }
+        //}
+       
     }
 
+    // Kräfte als Bewegung der einzelnen Atome umsetzen
     void applyForces()
     {
         foreach(var pair in movement)
         {
             getAtomByID(pair.Key).transform.localPosition += pair.Value;
-            test += pair.Value;
         }
-        print(test);
     }
 
-
+    // Atombindungen werden neu skaliert sobald Atome bewegt werden
     public void scaleConnections()
     {
         foreach(CarbonAtom atom in this.GetComponent<GlobalCtrl>().list_curCarbonAtoms)
@@ -188,7 +207,7 @@ public class ForceField : MonoBehaviour
     }
 
 
-
+    // Liefert bei gegebener ID das dazugehörige Atom zurück
     public CarbonAtom getAtomByID(float id)
     {
         foreach(CarbonAtom c1 in GetComponent<GlobalCtrl>().list_curCarbonAtoms)
