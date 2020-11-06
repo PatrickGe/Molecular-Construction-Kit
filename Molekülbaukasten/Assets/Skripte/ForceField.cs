@@ -48,7 +48,7 @@ public class ForceField : MonoBehaviour
         //vorherige Bewegungsmap leeren
         movement.Clear();
         //Durchlauf durch alle Atome
-        foreach(CarbonAtom c1 in GetComponent<GlobalCtrl>().list_curCarbonAtoms)
+        foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)
         {
             //Bewegungsmap füllen
             if (!movement.ContainsKey(c1._id))
@@ -56,7 +56,7 @@ public class ForceField : MonoBehaviour
                 movement.Add(c1._id, new Vector3(0, 0, 0));
             }
             //Vergleich mit allen Atomen
-            foreach(CarbonAtom c2 in GetComponent<GlobalCtrl>().list_curCarbonAtoms)
+            foreach(Atom c2 in GetComponent<GlobalCtrl>().list_curAtoms)
             {
                 //Durchlauf durch alle ConnectionPoints
                 foreach(ConnectionStatus conPoint in c1.getAllConPoints())
@@ -186,13 +186,13 @@ public class ForceField : MonoBehaviour
     // Atombindungen werden neu skaliert sobald Atome bewegt werden
     public void scaleConnections()
     {
-        foreach(CarbonAtom atom in this.GetComponent<GlobalCtrl>().list_curCarbonAtoms)
+        foreach(Atom atom in this.GetComponent<GlobalCtrl>().list_curAtoms)
         {
             foreach(ConnectionStatus carbonCP in atom.getAllConPoints())
             {
                 if (carbonCP.isConnected)
                 {
-                    CarbonAtom carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<CarbonAtom>();
+                    Atom carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<Atom>();
 
                     float distance = Vector3.Distance(atom.transform.position, carbonConnected.transform.position);
                     float distanceDiff = distance - standardDistance;
@@ -208,9 +208,9 @@ public class ForceField : MonoBehaviour
 
 
     // Liefert bei gegebener ID das dazugehörige Atom zurück
-    public CarbonAtom getAtomByID(float id)
+    public Atom getAtomByID(float id)
     {
-        foreach(CarbonAtom c1 in GetComponent<GlobalCtrl>().list_curCarbonAtoms)
+        foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)
         {
             if (c1._id == (int)id)
                 return c1;

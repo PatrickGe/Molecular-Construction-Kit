@@ -246,8 +246,8 @@
     <Compile Include="Assets\SenseGlove\Scripts\Util\SenseGlove_SaveCalibration.cs" />
     <Compile Include="Assets\SenseGlove\Scripts\Util\SenseGlove_Util.cs" />
     <Compile Include="Assets\SenseGlove\Scripts\Util\SwitchObjects.cs" />
+    <Compile Include="Assets\Skripte\Atom.cs" />
     <Compile Include="Assets\Skripte\Auswahlgeste.cs" />
-    <Compile Include="Assets\Skripte\CarbonAtom.cs" />
     <Compile Include="Assets\Skripte\CFileHelper.cs" />
     <Compile Include="Assets\Skripte\ConnectionStatus.cs" />
     <Compile Include="Assets\Skripte\EditMode.cs" />

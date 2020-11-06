@@ -110,7 +110,7 @@ public class SenseGlove_Grabable : SenseGlove_Interactable
                         {
                             if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && editMarker == false)
                             {
-                                pickupReference.transform.parent.GetComponent<EditMode>().regroupAtoms(pickupReference.GetComponent<CarbonAtom>());
+                                pickupReference.transform.parent.GetComponent<EditMode>().regroupAtoms(pickupReference.GetComponent<Atom>());
                                 this.pickupReference.parent.parent = grabScript.grabReference.transform;
                             } else if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && editMarker == true)
                             {

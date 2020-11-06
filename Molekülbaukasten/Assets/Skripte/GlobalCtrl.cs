@@ -37,25 +37,25 @@ public class GlobalCtrl : MonoBehaviour
             return instance;
         }
     }
-
+    
     public static int updown = 0;
-    public static int openSize = 0;
-    public List<string> open = new List<string>();
+    private static int openSize = 0;
+    private List<string> open = new List<string>();
     public List<atomData> list_atomData = new List<atomData>();
-    public List<CarbonAtom> list_curCarbonAtoms = new List<CarbonAtom>();
+    public List<Atom> list_curAtoms = new List<Atom>();
     public GameObject KohlenstoffPrefab;
     public GameObject VerbindungCC;
-    public GameObject hand;
-    public GameObject molecule;
-    public GameObject up;
-    public GameObject down;
-    public Vector3[,] position;
-    FileInfo[] info;
+
+    private GameObject molecule;
+    private GameObject up;
+    private GameObject down;
+    private Vector3[,] position;
+    public FileInfo[] info;
 
     public Text changingText;
     public static bool loadGUI = false;
 
-    CarbonAtom otherAtom;
+    Atom otherAtom;
     ConnectionStatus otherCP;
     public ConnectionStatus childSelected;
     public ConnectionStatus childGrabbedSelected;
@@ -89,7 +89,7 @@ public class GlobalCtrl : MonoBehaviour
                 down = obj;
             } else if (obj.name.StartsWith("kohlenstoff"))
             {
-                list_curCarbonAtoms.Add(obj.GetComponent<CarbonAtom>());
+                list_curAtoms.Add(obj.GetComponent<Atom>());
             }
         }
         DirectoryInfo dir = new DirectoryInfo(Application.dataPath + "/MoleculeFiles/");
@@ -116,7 +116,6 @@ public class GlobalCtrl : MonoBehaviour
             {
                 if (open.Count > 0)
                 {
-                    print(open.Count);
                     if (open[i + updown] != "")
                         GameObject.Find("GUILoad").transform.GetChild(i).GetChild(0).GetComponent<Text>().text = open[i + updown].Substring(open[i + updown].LastIndexOf("\\") + 1);
 
@@ -131,12 +130,12 @@ public class GlobalCtrl : MonoBehaviour
     {   //fertig
         _id += 1;
         GameObject kohlenstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
-        kohlenstoffatom.GetComponent<CarbonAtom>().f_Init(_id);
+        kohlenstoffatom.GetComponent<Atom>().f_Init(_id);
         kohlenstoffatom.transform.position = pos + new Vector3(0, 0, 0.2f);
-        list_curCarbonAtoms.Add(kohlenstoffatom.GetComponent<CarbonAtom>());
+        list_curAtoms.Add(kohlenstoffatom.GetComponent<Atom>());
     }
 
-    public void verbindungErstellen(List<CarbonAtom> senden)
+    public void verbindungErstellen(List<Atom> senden)
     {
         _conID += 1;
         senden[0].transform.parent = GameObject.Find("Molekül").transform;
@@ -188,8 +187,8 @@ public class GlobalCtrl : MonoBehaviour
             connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, connection.transform.localScale.z + (distance * 1));
         }
         //Verbundenen Atome und Punkte auf den Atomen setzen
-        childSelected.otherAtomID = senden[1].GetComponent<CarbonAtom>()._id;
-        childGrabbedSelected.otherAtomID = senden[0].GetComponent<CarbonAtom>()._id;
+        childSelected.otherAtomID = senden[1].GetComponent<Atom>()._id;
+        childGrabbedSelected.otherAtomID = senden[0].GetComponent<Atom>()._id;
         childSelected.conID = _conID;
         childGrabbedSelected.conID = _conID;
         int.TryParse(childGrabbedSelected.name, out childSelected.otherPointID);
@@ -201,18 +200,18 @@ public class GlobalCtrl : MonoBehaviour
         childGrabbedSelected = null;
         childSelected = null;
         //Alle Atome und deren Abstände zu den Nachbarn berechnen
-        for (int i = 0; i <= list_curCarbonAtoms.Count - 1; i++)
+        for (int i = 0; i <= list_curAtoms.Count - 1; i++)
         {
-            for (int j = 0; j <= list_curCarbonAtoms.Count - 1; j++)
+            for (int j = 0; j <= list_curAtoms.Count - 1; j++)
             {
-                position[i, j] = list_curCarbonAtoms[j].transform.position - list_curCarbonAtoms[i].transform.position;
+                position[i, j] = list_curAtoms[j].transform.position - list_curAtoms[i].transform.position;
             }
         }
     }
 
     public List<atomData> saveMolecule()
     {
-        foreach (CarbonAtom child in molecule.GetComponentsInChildren<CarbonAtom>())
+        foreach (Atom child in molecule.GetComponentsInChildren<Atom>())
         {
             atomData a;
             a.id = child._id;
@@ -246,11 +245,11 @@ public class GlobalCtrl : MonoBehaviour
         molecule.SetActive(true);
         GameObject.Find("GUILoad").SetActive(false);
         destroyMolecule();
-        list_curCarbonAtoms.Clear();
+        list_curAtoms.Clear();
         foreach (atomData atom in list)
         {
             GameObject atomObj = Instantiate(KohlenstoffPrefab, atom.pos, Quaternion.Euler(atom.rot));
-            CarbonAtom atomDef = atomObj.GetComponent<CarbonAtom>();
+            Atom atomDef = atomObj.GetComponent<Atom>();
             atomDef.f_Init(atom.id);
             atomDef.transform.parent = GameObject.Find("Molekül").transform;
             atomDef.c0.isConnected = atom.info0.isConnected;
@@ -267,7 +266,7 @@ public class GlobalCtrl : MonoBehaviour
             atomDef.c1.otherPointID = atom.info1.otherPointID;
             atomDef.c2.otherPointID = atom.info2.otherPointID;
             atomDef.c3.otherPointID = atom.info3.otherPointID;
-            list_curCarbonAtoms.Add(atomDef);
+            list_curAtoms.Add(atomDef);
             foreach(ConnectionStatus c in atomDef.getAllConPoints())
             {
                 c.conID = -1;
@@ -275,7 +274,7 @@ public class GlobalCtrl : MonoBehaviour
         }
 
         int tempID = 0;
-        foreach (CarbonAtom atom in list_curCarbonAtoms)
+        foreach (Atom atom in list_curAtoms)
         {
             foreach (ConnectionStatus cp in atom.getAllConPoints())
             {
@@ -283,7 +282,7 @@ public class GlobalCtrl : MonoBehaviour
                 {
                     
                     
-                    otherAtom = list_curCarbonAtoms.Find(p=>p._id==cp.otherAtomID);
+                    otherAtom = list_curAtoms.Find(p=>p._id==cp.otherAtomID);
                     otherCP = otherAtom.getConPoint(cp.otherPointID);
                     if (cp.conID == -1)
                     {
@@ -375,10 +374,10 @@ public class GlobalCtrl : MonoBehaviour
 
     public void destroyMolecule()
     {
-        foreach (CarbonAtom child in molecule.GetComponentsInChildren<CarbonAtom>())
+        foreach (Atom child in molecule.GetComponentsInChildren<Atom>())
         {
             Destroy(child.gameObject);
-            list_curCarbonAtoms.Remove(child);
+            list_curAtoms.Remove(child);
         }
         foreach (GameObject con in GameObject.FindGameObjectsWithTag("VerbindungCC"))
         {
@@ -391,11 +390,11 @@ public class GlobalCtrl : MonoBehaviour
         if(GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
         {
             destroyMolecule();
-            foreach(CarbonAtom c in list_curCarbonAtoms)
+            foreach(Atom c in list_curAtoms)
             {
                 Destroy(c.gameObject);
             }
-            list_curCarbonAtoms.Clear();
+            list_curAtoms.Clear();
             foreach (GameObject con in GameObject.FindGameObjectsWithTag("VerbindungCC"))
             {
                 Destroy(con);
@@ -403,14 +402,14 @@ public class GlobalCtrl : MonoBehaviour
             atomMap.Clear();
         } else
         {
-            CarbonAtom fixedAtom = GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom;
+            Atom fixedAtom = GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom;
             GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom = null;
             GameObject.Find("Molekül").GetComponent<EditMode>().editMode = false;
             foreach (ConnectionStatus connection in fixedAtom.getAllConPoints())
             {
                 if(connection.isConnected == true)
                 {
-                    CarbonAtom otherAtom = list_curCarbonAtoms.Find(p => p._id == connection.otherAtomID);
+                    Atom otherAtom = list_curAtoms.Find(p => p._id == connection.otherAtomID);
                     ConnectionStatus otherPoint = otherAtom.getConPoint(connection.otherPointID);
                     otherPoint.isConnected = false;
                     otherPoint.otherAtomID = -1;
@@ -421,7 +420,7 @@ public class GlobalCtrl : MonoBehaviour
                 }
             }
             Destroy(fixedAtom.gameObject);
-            list_curCarbonAtoms.Remove(fixedAtom);
+            list_curAtoms.Remove(fixedAtom);
             atomMap.Remove(fixedAtom._id);
         }
     }

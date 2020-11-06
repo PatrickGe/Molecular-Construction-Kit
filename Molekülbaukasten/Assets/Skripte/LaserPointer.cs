@@ -7,20 +7,19 @@ namespace Valve.VR.Extras
 {
     public class LaserPointer : MonoBehaviour
     {
-        public SteamVR_Behaviour_Pose pose;
+        private SteamVR_Behaviour_Pose pose;
         public SteamVR_Action_Vector2 trackpadtouch = SteamVR_Input.GetVector2Action("TrackpadTouch");
         public SteamVR_Action_Boolean trackpadklicked = SteamVR_Input.GetBooleanAction("TrackpadKlick");
         public SteamVR_Action_Vibration vibration;
-        public bool active = true;
-        public float thickness = 0.002f;
-        public GameObject holder;
-        public GameObject pointer;
-        bool isActive = false;
-        public bool addRigidBody = false;
+        private float thickness = 0.002f;
+        private GameObject holder;
+        private GameObject pointer;
+        private bool isActive = false;
+        private bool addRigidBody = false;
         public Object[] allGameObjects;
         public GameObject guiSave;
         public GameObject guiLoad;
-        public GameObject molecule;
+        private GameObject molecule;
 
         private void Start()
         {
@@ -28,7 +27,7 @@ namespace Valve.VR.Extras
                 pose = this.GetComponent<SteamVR_Behaviour_Pose>();
             if (pose == null)
                 Debug.LogError("No SteamVR_Behaviour_Pose component found on this object", this);
-
+            //Transform controller
             holder = new GameObject();
             holder.transform.parent = this.transform;
             holder.transform.localPosition = Vector3.zero;
@@ -58,6 +57,8 @@ namespace Valve.VR.Extras
             Material newMaterial = new Material(Shader.Find("Unlit/Color"));
             newMaterial.SetColor("_Color", Color.green);
             pointer.GetComponent<MeshRenderer>().material = newMaterial;
+
+            //Transform GUI Options + Molecule
             allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
             foreach (GameObject obj in allGameObjects)
             {
@@ -83,6 +84,7 @@ namespace Valve.VR.Extras
                 isActive = true;
                 this.transform.GetChild(0).gameObject.SetActive(true);
             }
+            //IF Trackpad is touched in the front mittle of the trackpad, the laserpointer appears
             Vector2 touchPos = trackpadtouch.GetAxis(SteamVR_Input_Sources.Any);
             if (touchPos.y >= 0.5)
             {
@@ -96,8 +98,10 @@ namespace Valve.VR.Extras
             Ray raycast = new Ray(transform.position, rayTrans.forward);
             RaycastHit hit;
             bool bHit = Physics.Raycast(raycast, out hit);
+            //Klick on the trackpad confirms the selection, target gets executed
             if (trackpadklicked.stateDown && bHit && touchPos.y >= 0.5)
             {
+                //Open an already saved molecule
                 if (hit.collider.name == "Öffnen" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
@@ -107,10 +111,10 @@ namespace Valve.VR.Extras
                     GameObject.Find("UI2").transform.position = new Vector3(0, 0, 0);
                     GameObject.Find("UI3").transform.position = new Vector3(0, 0, 0);
                     GameObject.Find("Molekül").SetActive(false);
-                    print(this.GetComponentInParent<GlobalCtrl>());
                     this.GetComponentInParent<GlobalCtrl>().loadGUILoad();
                     guiLoad.SetActive(true);
                 }
+                //Save created molecule
                 else if (hit.collider.name == "Speichern" && guiSave.activeInHierarchy == false && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
@@ -122,28 +126,32 @@ namespace Valve.VR.Extras
                     GameObject.Find("UI3").transform.position = new Vector3(0, 0, 0);
                     GameObject.Find("Molekül").SetActive(false);
                 }
+                //Create new carbon atom
                 else if (hit.collider.name == "PeriodensystemC" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     this.GetComponentInParent<GlobalCtrl>().kohlenstoffErstellen(this.transform.position);
                 }
+                //Delete atoms or whole molecule
                 else if (hit.collider.name == "recycle bin" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     this.GetComponentInParent<GlobalCtrl>().recycle();
                 }
+                //Mark an existing atom to edit / delete it
                 else if (hit.collider.name.StartsWith("kohlenstoff") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
-                    //einzelnes Kohlenstoff Atom ausgewählt -- Bearbeitungsmodus öffnen
+                    //if it isn't selected before,start edit mode
                     if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
                     {
                         GameObject.Find("Molekül").GetComponent<EditMode>().editMode = true;
-                        GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom = hit.collider.gameObject.GetComponent<CarbonAtom>();
+                        GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom = hit.collider.gameObject.GetComponent<Atom>();
                         hit.collider.gameObject.GetComponent<Renderer>().material.color = new Color32(255, 0, 0, 255);
                         hit.collider.gameObject.GetComponent<SenseGlove_Grabable>().editMarker = true;
                     }
-                    else if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && hit.collider.gameObject.GetComponent<CarbonAtom>()._id == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom._id)
+                    //if it already was selected before, close edit mode
+                    else if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && hit.collider.gameObject.GetComponent<Atom>()._id == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom._id)
                     {
                         hit.collider.gameObject.GetComponent<SenseGlove_Grabable>().editMarker = false;
                         GameObject.Find("Molekül").GetComponent<EditMode>().editMode = false;
@@ -151,35 +159,41 @@ namespace Valve.VR.Extras
                         hit.collider.gameObject.GetComponent<Renderer>().material.color = new Color32(0, 0, 0, 255);
                     }
                 }
+                //Select the whole molecule -- moves as a solid structure
                 else if((hit.collider.name == "AllAtoms") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     GameObject.Find("AllAtoms").transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                     GameObject.Find("SingleAtom").transform.localScale = new Vector3(0.07f, 0.1f, 0.07f);
                     this.GetComponentInParent<GlobalCtrl>().allAtom = true;
                 }
+                //Select single atom -- moves independent from the molecule
                 else if ((hit.collider.name == "SingleAtom") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     GameObject.Find("AllAtoms").transform.localScale = new Vector3(0.07f, 0.1f, 0.07f);
                     GameObject.Find("SingleAtom").transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
                     this.GetComponentInParent<GlobalCtrl>().allAtom = false;
                 }
+                //Turn off the forcefield, no forces are calculated
                 else if ((hit.collider.name == "ButtonOFF") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     GameObject.Find("ButtonON").transform.localPosition = new Vector3(4.75f, 1.6f, 6.5f);
                     GameObject.Find("ButtonOFF").transform.localPosition = new Vector3(4.775f, 1.6f, 6.53f);
                     this.GetComponentInParent<GlobalCtrl>().forceField = true;
                 }
+                //Turn on the forcefiled, forces are calculated, atoms are going to move if forces are big enough
                 else if ((hit.collider.name == "ButtonON") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     GameObject.Find("ButtonOFF").transform.localPosition = new Vector3(4.75f, 1.6f, 6.5f);
                     GameObject.Find("ButtonON").transform.localPosition = new Vector3(4.775f, 1.6f, 6.53f);
                     this.GetComponentInParent<GlobalCtrl>().forceField = false;
                 }
+                //Typing on virtual keyboard
                 else if(hit.collider.transform.parent != null && hit.collider.transform.parent.name == "Tastatur")
                 {
                     GlobalCtrl text = this.transform.root.GetComponent<GlobalCtrl>();
                     text.textChange(hit.collider.gameObject);
                 }
+                //Scrollbar and update in GUI, if "open created molecule" is active
                 else if (hit.collider.transform.parent != null && hit.collider.transform.parent.name == "GUILoad")
                 {
                     if(hit.collider.name == "Down")

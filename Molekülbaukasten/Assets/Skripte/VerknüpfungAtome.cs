@@ -15,12 +15,12 @@ public class VerknüpfungAtome : MonoBehaviour
     GameObject zwischenSpeicher;
     GameObject[] alleKohlenstoff;
     SenseGlove_Grabable grabable;
-    List<CarbonAtom> senden;
+    List<Atom> senden;
 
     // Start is called before the first frame update
     void Start()
     {
-        senden = new List<CarbonAtom>();
+        senden = new List<Atom>();
         grabable = GetComponent<SenseGlove_Grabable>();
     }
 
@@ -36,13 +36,13 @@ public class VerknüpfungAtome : MonoBehaviour
             {
                 if (grabable.name != alleKohlenstoff[j - 1].name && grabable.transform.parent.name != "Molekül")
                 {
-                    if (grabable.GetComponent<CarbonAtom>().c0.otherAtomID != alleKohlenstoff[j - 1].GetComponent<CarbonAtom>()._id &&
-                        grabable.GetComponent<CarbonAtom>().c1.otherAtomID != alleKohlenstoff[j - 1].GetComponent<CarbonAtom>()._id &&
-                        grabable.GetComponent<CarbonAtom>().c2.otherAtomID != alleKohlenstoff[j - 1].GetComponent<CarbonAtom>()._id &&
-                        grabable.GetComponent<CarbonAtom>().c3.otherAtomID != alleKohlenstoff[j - 1].GetComponent<CarbonAtom>()._id) {
+                    if (grabable.GetComponent<Atom>().c0.otherAtomID != alleKohlenstoff[j - 1].GetComponent<Atom>()._id &&
+                        grabable.GetComponent<Atom>().c1.otherAtomID != alleKohlenstoff[j - 1].GetComponent<Atom>()._id &&
+                        grabable.GetComponent<Atom>().c2.otherAtomID != alleKohlenstoff[j - 1].GetComponent<Atom>()._id &&
+                        grabable.GetComponent<Atom>().c3.otherAtomID != alleKohlenstoff[j - 1].GetComponent<Atom>()._id) {
                         alreadyGrabbed = true;
                         distance = Vector3.Distance(grabable.transform.position, alleKohlenstoff[j - 1].transform.position);
-                        if (distance <= 0.25 && (alleKohlenstoff[j - 1].transform.parent != null || alleKohlenstoff.Length <= 2) && !alleKohlenstoff[j - 1].GetComponent<CarbonAtom>().isFull)
+                        if (distance <= 0.25 && (alleKohlenstoff[j - 1].transform.parent != null || alleKohlenstoff.Length <= 2) && !alleKohlenstoff[j - 1].GetComponent<Atom>().isFull)
                         {
                             zwischenSpeicher = alleKohlenstoff[j - 1];
                             alleKohlenstoff[j - 1].GetComponent<Renderer>().material.color = new Color32((byte)redCol, (byte)greenCol, (byte)blueCol, 255);
@@ -58,7 +58,7 @@ public class VerknüpfungAtome : MonoBehaviour
                             startedFlashing = false;
                             StopCoroutine(FlashObject(distance));
                             CR_running = false;
-                            if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom._id != alleKohlenstoff[j - 1].GetComponent<CarbonAtom>()._id)
+                            if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom._id != alleKohlenstoff[j - 1].GetComponent<Atom>()._id)
                             {
                                 alleKohlenstoff[j - 1].GetComponent<Renderer>().material.color = new Color32(0, 0, 0, 255);
                             } else if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
@@ -78,13 +78,13 @@ public class VerknüpfungAtome : MonoBehaviour
             startedFlashing = false;
             CR_running = false;
 
-            if (zwischenSpeicher != null && distance <= 0.25 && zwischenSpeicher.GetComponent<CarbonAtom>().isFull == false)
+            if (zwischenSpeicher != null && distance <= 0.25 && zwischenSpeicher.GetComponent<Atom>().isFull == false)
             {
                 senden.Clear();
-                senden.Add(zwischenSpeicher.GetComponent<CarbonAtom>());
-                senden.Add(grabable.GetComponent<CarbonAtom>());
+                senden.Add(zwischenSpeicher.GetComponent<Atom>());
+                senden.Add(grabable.GetComponent<Atom>());
                 grabable.transform.parent = GameObject.Find("Molekül").transform;
-                if(zwischenSpeicher.GetComponent<CarbonAtom>() == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
+                if(zwischenSpeicher.GetComponent<Atom>() == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
                     zwischenSpeicher.GetComponent<Renderer>().material.color = new Color32(255, 0, 0, 255);
                 else
                     zwischenSpeicher.GetComponent<Renderer>().material.color = new Color32(0, 0, 0, 255);

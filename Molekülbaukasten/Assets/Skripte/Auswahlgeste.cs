@@ -286,11 +286,11 @@ public class Auswahlgeste: MonoBehaviour
                     if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
                     {
                         GameObject.Find("Molekül").GetComponent<EditMode>().editMode = true;
-                        GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom = hit.collider.gameObject.GetComponent<CarbonAtom>();
+                        GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom = hit.collider.gameObject.GetComponent<Atom>();
                         hit.collider.gameObject.GetComponent<Renderer>().material.color = new Color32(255, 0, 0, 255);
                         hit.collider.gameObject.GetComponent<SenseGlove_Grabable>().editMarker = true;
                     }
-                    else if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && hit.collider.gameObject.GetComponent<CarbonAtom>()._id == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom._id)
+                    else if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true && hit.collider.gameObject.GetComponent<Atom>()._id == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom._id)
                     {
                         hit.collider.gameObject.GetComponent<SenseGlove_Grabable>().editMarker = false;
                         GameObject.Find("Molekül").GetComponent<EditMode>().editMode = false;
