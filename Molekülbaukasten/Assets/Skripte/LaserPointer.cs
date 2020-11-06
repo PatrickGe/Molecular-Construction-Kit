@@ -130,7 +130,7 @@ namespace Valve.VR.Extras
                 else if (hit.collider.name == "PeriodensystemC" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
-                    this.GetComponentInParent<GlobalCtrl>().kohlenstoffErstellen(this.transform.position);
+                    this.GetComponentInParent<GlobalCtrl>().createCarbon(this.transform.position);
                 }
                 //Delete atoms or whole molecule
                 else if (hit.collider.name == "recycle bin" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))

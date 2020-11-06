@@ -126,7 +126,7 @@ public class GlobalCtrl : MonoBehaviour
         }
     }
 
-    public void kohlenstoffErstellen(Vector3 pos)
+    public void createCarbon(Vector3 pos)
     {   //fertig
         _id += 1;
         GameObject kohlenstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
@@ -135,7 +135,7 @@ public class GlobalCtrl : MonoBehaviour
         list_curAtoms.Add(kohlenstoffatom.GetComponent<Atom>());
     }
 
-    public void verbindungErstellen(List<Atom> senden)
+    public void createConnection(List<Atom> senden)
     {
         _conID += 1;
         senden[0].transform.parent = GameObject.Find("Molekül").transform;

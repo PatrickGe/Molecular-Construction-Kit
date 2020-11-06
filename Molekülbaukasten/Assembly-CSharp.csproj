@@ -265,6 +265,7 @@
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />
     <None Include="Assets\HTC.UnityPlugin\ViveInputUtility\Resources\Unlit-AlphaWithFade.shader" />
     <None Include="Assets\MoleculeFiles\5C.xml" />
+    <None Include="Assets\MoleculeFiles\778.xml" />
     <None Include="Assets\SenseGlove\Data\UserProfiles.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
     <None Include="Assets\MoleculeFiles\D2.xml" />

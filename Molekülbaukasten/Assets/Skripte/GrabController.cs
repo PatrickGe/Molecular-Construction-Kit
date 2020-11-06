@@ -145,7 +145,7 @@ public class GrabController : MonoBehaviour
                     connectAtom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
                 }
                 
-                this.GetComponentInParent<GlobalCtrl>().verbindungErstellen(senden);
+                this.GetComponentInParent<GlobalCtrl>().createConnection(senden);
                 senden.Clear();
             }
             connectAtom = null;
