@@ -22,8 +22,7 @@ public class ForceField : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Wenn das Kraftfeld aktiv ist, sämtliche Bindungen und Kräfte updaten,
-        // sonst nur Bindungen aktualisieren
+        // If the forcefield is active, update all connections and forces, else only update connections
         if (this.GetComponent<GlobalCtrl>().forceField)
         {
             bondList.Clear();
@@ -39,34 +38,34 @@ public class ForceField : MonoBehaviour
     }
 
     /*
-     * Generierung / Update der Bindungs- und Winkellisten.
-     * Muss später um Torsionen und Impropers u.ä. erweitert werden
-     * Update ggf. durch "Was ist neu" beschleunigen
+     * generation / update of the connection and angle lists.
+     * Will be extended later with torsions and impropers etc.
+     * maybe speed up update with "what is new"
      */ 
     void generateLists()
     {
-        //vorherige Bewegungsmap leeren
+        //clear previious movement map
         movement.Clear();
-        //Durchlauf durch alle Atome
+        //cycle through all atoms
         foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)
         {
-            //Bewegungsmap füllen
+            //fill movement map
             if (!movement.ContainsKey(c1._id))
             {
                 movement.Add(c1._id, new Vector3(0, 0, 0));
             }
-            //Vergleich mit allen Atomen
+            //compare with all atoms
             foreach(Atom c2 in GetComponent<GlobalCtrl>().list_curAtoms)
             {
-                //Durchlauf durch alle ConnectionPoints
+                //cycle through all connection points
                 foreach(ConnectionStatus conPoint in c1.getAllConPoints())
                 {
-                    //Wenn Verbindung besteht, zu Listen hinzufügen
+                    //if a connection exists, add to list
                     if(conPoint.otherAtomID == c2._id)
                     {
                         if(!bondList.Contains(new Vector2(c1._id, c2._id)) && !bondList.Contains(new Vector2(c2._id, c1._id)))
                         {
-                            //Winkelliste
+                            //angle list
                             foreach (Vector2 vec in bondList)
                             {
                                 if (vec.x == c1._id)
@@ -85,7 +84,7 @@ public class ForceField : MonoBehaviour
                                     angleList.Add(new Vector3(vec.x, c2._id, c1._id));
                                 }
                             }
-                            //Bindungsliste
+                            //bond list
                             bondList.Add(new Vector2(c1._id, c2._id));
                         }
                         
@@ -96,8 +95,8 @@ public class ForceField : MonoBehaviour
         }
     }
 
-    // Für alle Bindungen in den jeweiligen Listen werden die Kräfte berechnet,
-    // am Ende wird die Methode zum Aktualisieren der Position aufgerufen.
+    //for all connections in the corresponding lists, the forces are calculated.
+    // at the end, the method to update the positions of the atoms is called
     void forces()
     {
         //Loop Bond List
@@ -115,15 +114,15 @@ public class ForceField : MonoBehaviour
         applyForces();
     }
 
-    // Berechnet Bindungskräfte
+    // calculate bond forces
     void calcBondForces(Vector2 bond)
     {
         
-        //Bindungsvektor
+        //bond vector
         Vector3 rb = getAtomByID(bond.x).transform.localPosition - getAtomByID(bond.y).transform.localPosition;
-        //Kraft entlang diesem Bindungsvektor
+        //force on this bond vector
         float fb =  -kb *  (Vector3.Magnitude(rb) - standardDistance) ;
-        //Kräfte auf die beiden Atome verteilt
+        //separate the forces on the two atoms
         Vector3 fc1 = fb * (rb / Vector3.Magnitude(rb));
         Vector3 fc2 = -fb * (rb / Vector3.Magnitude(rb));
 
@@ -131,7 +130,7 @@ public class ForceField : MonoBehaviour
         movement[(int)bond.y] += fc2 * 0.07f;
     }
 
-    // Berechnet Winkelkräfte
+    // calculate angle forces
     void calcAngleForces(Vector3 angle)
     {
         Vector3 rb1 = getAtomByID(angle.x).transform.localPosition - getAtomByID(angle.y).transform.localPosition;
@@ -145,7 +144,7 @@ public class ForceField : MonoBehaviour
         Vector3 fK = (mAlpha / (Vector3.Magnitude(rb2) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb2 / Vector3.Magnitude(rb2)) - cosAlpha * (rb1 / Vector3.Magnitude(rb1)));
         Vector3 fJ = -fI - fK;
         float angleFactor = 0.001f;
-        // Winkelkräfte viel zu stark, sobald mehrere Atome darauf einwirken, evtl normalisieren oder weiter verkleinern?
+        // angle forces much too strom, maybe mistake or scale them down again
         if ((angleAlpha <= 170.0f || angleAlpha >= 190.0f) && (angleAlpha >= 5.0f))
         {
             movement[(int)angle.x] += fI * 0.07f * angleFactor;
@@ -174,7 +173,7 @@ public class ForceField : MonoBehaviour
        
     }
 
-    // Kräfte als Bewegung der einzelnen Atome umsetzen
+    // implement forces to movement of each atom
     void applyForces()
     {
         foreach(var pair in movement)
@@ -183,7 +182,7 @@ public class ForceField : MonoBehaviour
         }
     }
 
-    // Atombindungen werden neu skaliert sobald Atome bewegt werden
+    // connections between atoms get scaled new as soon as the position of an atom gets updated
     public void scaleConnections()
     {
         foreach(Atom atom in this.GetComponent<GlobalCtrl>().list_curAtoms)
@@ -207,7 +206,7 @@ public class ForceField : MonoBehaviour
     }
 
 
-    // Liefert bei gegebener ID das dazugehörige Atom zurück
+    // returns the atom with the given ID
     public Atom getAtomByID(float id)
     {
         foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)

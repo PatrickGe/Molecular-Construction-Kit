@@ -71,7 +71,7 @@ public class GlobalCtrl : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        position = new Vector3[1000, 1000];
+        //position = new Vector3[1000, 1000];
         scale = 0.1f;
         allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
         foreach (GameObject obj in allGameObjects)
@@ -127,7 +127,7 @@ public class GlobalCtrl : MonoBehaviour
     }
 
     public void createCarbon(Vector3 pos)
-    {   //fertig
+    {   
         _id += 1;
         GameObject kohlenstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
         kohlenstoffatom.GetComponent<Atom>().f_Init(_id);
@@ -140,7 +140,7 @@ public class GlobalCtrl : MonoBehaviour
         _conID += 1;
         senden[0].transform.parent = GameObject.Find("Molekül").transform;
         senden[1].transform.parent = GameObject.Find("Molekül").transform;
-        //Position hier setzen
+        //set position here
         foreach (ConnectionStatus childofGrabbedLoop in senden[1].getAllConPoints())
         {
             if (childofGrabbedLoop.isConnected == false)
@@ -163,18 +163,17 @@ public class GlobalCtrl : MonoBehaviour
                 }
             }
         }
-
-        // Neu hinzugefügtes Atom zu gewähltem Vektor rotieren, Kind als connected anzeigen.
+        //newly addes atom gets rotated to vector, it's child object is shown as connected
         childGrabbedSelected.isConnected = true;
         childSelected.isConnected = true;
-        if (/*GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false*/true)
-        {
-            senden[1].transform.position = senden[0].transform.position + Quaternion.Euler(senden[0].transform.rotation.eulerAngles) * ((childSelected.transform.localPosition / childSelected.transform.parent.localScale.x) * scale);
-            Vector3 direction = childSelected.transform.position - senden[1].transform.position;
-            Quaternion rotation = Quaternion.FromToRotation(childGrabbedSelected.transform.localPosition, direction);
-            senden[1].transform.rotation = rotation;
-        }
-        //Verbindung erstellen
+
+        // positioning of the linked atoms
+        senden[1].transform.position = senden[0].transform.position + Quaternion.Euler(senden[0].transform.rotation.eulerAngles) * ((childSelected.transform.localPosition / childSelected.transform.parent.localScale.x) * scale);
+        Vector3 direction = childSelected.transform.position - senden[1].transform.position;
+        Quaternion rotation = Quaternion.FromToRotation(childGrabbedSelected.transform.localPosition, direction);
+        senden[1].transform.rotation = rotation;
+
+        //create the visual connection between them
         childGrabbedSelected.gameObject.SetActive(false);
         childSelected.gameObject.SetActive(false);
         GameObject connection = Instantiate(VerbindungCC, senden[0].transform.position, Quaternion.identity);
@@ -186,7 +185,7 @@ public class GlobalCtrl : MonoBehaviour
         {
             connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, connection.transform.localScale.z + (distance * 1));
         }
-        //Verbundenen Atome und Punkte auf den Atomen setzen
+        //additional information is set, so each atom knows the id of it's connected atoms
         childSelected.otherAtomID = senden[1].GetComponent<Atom>()._id;
         childGrabbedSelected.otherAtomID = senden[0].GetComponent<Atom>()._id;
         childSelected.conID = _conID;
@@ -194,23 +193,22 @@ public class GlobalCtrl : MonoBehaviour
         int.TryParse(childGrabbedSelected.name, out childSelected.otherPointID);
         int.TryParse(childSelected.name, out childGrabbedSelected.otherPointID);
 
-        //addToMap(senden[0], senden[1]);
-        //addToMap(senden[1], senden[1]);
-
+        //reset used variables
         childGrabbedSelected = null;
         childSelected = null;
         //Alle Atome und deren Abstände zu den Nachbarn berechnen
-        for (int i = 0; i <= list_curAtoms.Count - 1; i++)
-        {
-            for (int j = 0; j <= list_curAtoms.Count - 1; j++)
-            {
-                position[i, j] = list_curAtoms[j].transform.position - list_curAtoms[i].transform.position;
-            }
-        }
+        //for (int i = 0; i <= list_curAtoms.Count - 1; i++)
+        //{
+        //    for (int j = 0; j <= list_curAtoms.Count - 1; j++)
+        //    {
+        //        position[i, j] = list_curAtoms[j].transform.position - list_curAtoms[i].transform.position;
+        //    }
+        //}
     }
 
     public List<atomData> saveMolecule()
     {
+        // add each atom and it's information to the list, which is then saved as XML
         foreach (Atom child in molecule.GetComponentsInChildren<Atom>())
         {
             atomData a;
@@ -240,12 +238,13 @@ public class GlobalCtrl : MonoBehaviour
     public void loadMolecule(List<atomData> list)
     {
         _conID = 0;
-        //Molekül zurücksetzen
+        //reset molecule
         loadGUI = false;
         molecule.SetActive(true);
         GameObject.Find("GUILoad").SetActive(false);
         destroyMolecule();
         list_curAtoms.Clear();
+        //get the atom data for each atom in the saved list and instantiate the atoms with their data
         foreach (atomData atom in list)
         {
             GameObject atomObj = Instantiate(KohlenstoffPrefab, atom.pos, Quaternion.Euler(atom.rot));
@@ -273,6 +272,7 @@ public class GlobalCtrl : MonoBehaviour
             }
         }
 
+        //loop all atoms and their connections, if they have a connection --> create it
         int tempID = 0;
         foreach (Atom atom in list_curAtoms)
         {
@@ -281,9 +281,10 @@ public class GlobalCtrl : MonoBehaviour
                 if (cp.isConnected == true)
                 {
                     
-                    
+                    // find connected atom: Find atom p, where p.id = otherAtomID
                     otherAtom = list_curAtoms.Find(p=>p._id==cp.otherAtomID);
                     otherCP = otherAtom.getConPoint(cp.otherPointID);
+                    //if the connection hasn't already been created in the same loop because it was part of the "other atom" before, create it now
                     if (cp.conID == -1)
                     {
                         _conID += 1;
@@ -299,16 +300,19 @@ public class GlobalCtrl : MonoBehaviour
                         otherCP.gameObject.SetActive(false);
                     }
                 }
+                // set full attribute if needed
                 if (atom.c0.isConnected == true && atom.c1.isConnected == true && atom.c2.isConnected == true && atom.c3.isConnected == true)
                 {
                     atom.isFull = true;
                 }
             }
+            // update atomID
             if(atom._id > tempID)
             {
                 tempID = atom._id;
             }
         }
+        //replace atom ID, if a new atom is created now, the ID starts at _id+1, so that each atomID is unique
         _id = tempID;
     }
 
@@ -333,6 +337,8 @@ public class GlobalCtrl : MonoBehaviour
 
     public void textChange(GameObject key)
     {
+        //text typed on the virtual keyboard by the user is put together to one string here
+        //different special cases with the standard case, just adding the character, below
         changingText.text = GameObject.Find("GUISave").transform.GetChild(0).GetComponent<Text>().text;
         string s = key.name;
         if (changingText.text == "Name eingeben")
@@ -374,6 +380,7 @@ public class GlobalCtrl : MonoBehaviour
 
     public void destroyMolecule()
     {
+        //Deletes the whole molecule and it's connections
         foreach (Atom child in molecule.GetComponentsInChildren<Atom>())
         {
             Destroy(child.gameObject);
@@ -387,6 +394,8 @@ public class GlobalCtrl : MonoBehaviour
 
     public void recycle()
     {
+        //select if one atom is marked red or not
+        // if a single atom is marked red, this one gets deleted, else the whole molecule will be deleted
         if(GameObject.Find("Molekül").GetComponent<EditMode>().editMode == false)
         {
             destroyMolecule();
