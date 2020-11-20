@@ -9,7 +9,7 @@ public class ForceField : MonoBehaviour
     Dictionary<int, Vector3> movement = new Dictionary<int, Vector3>();
 
     float kb = 1.0f;
-    float ka = 1.0f;
+    float ka = 0.0001f;
     float standardDistance = 0.35f;
     float alphaNull = 109.4712f;
 
@@ -138,18 +138,20 @@ public class ForceField : MonoBehaviour
 
         float cosAlpha = (Vector3.Dot(rb1, rb2)) / (Vector3.Magnitude(rb1) * Vector3.Magnitude(rb2));
         float angleAlpha = Mathf.Acos(cosAlpha) * (180 / Mathf.PI);
-        float mAlpha = -ka * (Mathf.Acos(cosAlpha) * (180 / Mathf.PI) - alphaNull) ;
+        float mAlpha = -ka * (Mathf.Acos(cosAlpha) * (180 / Mathf.PI) - alphaNull);
 
         Vector3 fI = (mAlpha / (Vector3.Magnitude(rb1) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb1 / Vector3.Magnitude(rb1)) - cosAlpha*(rb2 / Vector3.Magnitude(rb2)));
         Vector3 fK = (mAlpha / (Vector3.Magnitude(rb2) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb2 / Vector3.Magnitude(rb2)) - cosAlpha * (rb1 / Vector3.Magnitude(rb1)));
         Vector3 fJ = -fI - fK;
-        float angleFactor = 0.001f;
-        // angle forces much too strom, maybe mistake or scale them down again
-        if ((angleAlpha <= 170.0f || angleAlpha >= 190.0f) && (angleAlpha >= 5.0f))
+
+        // angle forces much too strong, maybe mistake or scale them down again
+        if (true/*(angleAlpha <= 170.0f || angleAlpha >= 190.0f) && (angleAlpha >= 5.0f)*/)
         {
-            movement[(int)angle.x] += fI * 0.07f * angleFactor;
-            movement[(int)angle.y] += fK * 0.07f * angleFactor;
-            movement[(int)angle.z] += fJ * 0.07f * angleFactor;
+            movement[(int)angle.x] += fI * 0.07f;
+            movement[(int)angle.y] += fK * 0.07f;
+            movement[(int)angle.z] += fJ * 0.07f;
+
+            
         }
         // else
         //{
@@ -176,10 +178,18 @@ public class ForceField : MonoBehaviour
     // implement forces to movement of each atom
     void applyForces()
     {
+        Vector3 test = new Vector3(0, 0, 0);
         foreach(var pair in movement)
         {
             getAtomByID(pair.Key).transform.localPosition += pair.Value;
+            test += pair.Value;
+            //print(pair.Key);
+            //print(pair.Value.x + "  :  " + pair.Value.y + "  :  " + pair.Value.z);
+
+            //print("Leer");
         }
+
+        //print(test.x + "  :  " + test.y + "  :  " + test.z);
     }
 
     // connections between atoms get scaled new as soon as the position of an atom gets updated
@@ -206,7 +216,7 @@ public class ForceField : MonoBehaviour
     }
 
 
-    // returns the atom with the given ID
+    // returns the atom with the given ID 
     public Atom getAtomByID(float id)
     {
         foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)
