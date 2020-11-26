@@ -4,14 +4,27 @@ using UnityEngine;
 
 public class ForceField : MonoBehaviour
 {
+    // COMMENT1
+    // bonds and angles will have individual force constants and equilibrium values
+    // thus we have to use other structures (or classes?) here, e.g.
+    // public struct CovBond
+    // {
+    //    public int Atom1; public int Atom2; public float kBond; public float r_eq;
+    // }
+    // public List<CovBond> NewBondList = new List<CovBond>(); // not sure this contructor works
+
     public List<Vector2> bondList = new List<Vector2>();
     List<Vector3> angleList = new List<Vector3>();
+    // COMMENT2
+    // for control of our movements, we need a list with all atom positions
+    Dictionary<int, Vector3> position = new Dictionary<int, Vector3>();
     Dictionary<int, Vector3> movement = new Dictionary<int, Vector3>();
 
-    float kb = 1.0f;
-    float ka = 0.0001f;
-    float standardDistance = 0.35f;
-    float alphaNull = 109.4712f;
+    float scalingFactor = 1f/440f; // with this, 154 pm are equivalent to 0.35 m in the model
+    float kb = 1.0f;    // should be integrated into new bondList structure
+    float ka = 0.0001f; // should be integrated into new angleList structure
+    float standardDistance = 154f*scalingFactor; // integrate into new bondList
+    float alphaNull = 109.4712f; // integrate into new angleList
 
     // Start is called before the first frame update
     void Start()
@@ -25,6 +38,7 @@ public class ForceField : MonoBehaviour
         // If the forcefield is active, update all connections and forces, else only update connections
         if (this.GetComponent<GlobalCtrl>().forceField)
         {
+		    // COMMENT2a: how could we check that the lists need an update?
             bondList.Clear();
             angleList.Clear();
             generateLists();
@@ -44,8 +58,9 @@ public class ForceField : MonoBehaviour
      */ 
     void generateLists()
     {
-        //clear previious movement map
+        //clear previous movement and position map
         movement.Clear();
+        position.Clear();
         //cycle through all atoms
         foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)
         {
@@ -53,6 +68,7 @@ public class ForceField : MonoBehaviour
             if (!movement.ContainsKey(c1._id))
             {
                 movement.Add(c1._id, new Vector3(0, 0, 0));
+                position.Add(c1._id, c1.transform.localPosition);
             }
             //compare with all atoms
             foreach(Atom c2 in GetComponent<GlobalCtrl>().list_curAtoms)
@@ -111,9 +127,12 @@ public class ForceField : MonoBehaviour
             calcAngleForces(angle);
         }
 
-        applyForces();
+        calcMovements();
+
+        applyMovements();
     }
 
+    // COMMENT3: instead of fetching the atom coordinates here, the info on list 'positions' could be used
     // calculate bond forces
     void calcBondForces(Vector2 bond)
     {
@@ -126,6 +145,7 @@ public class ForceField : MonoBehaviour
         Vector3 fc1 = fb * (rb / Vector3.Magnitude(rb));
         Vector3 fc2 = -fb * (rb / Vector3.Magnitude(rb));
 
+        // COMMENT4: the scaling (by 0.07) should be applied later. In principle the scaling will depend on the atomic masses
         movement[(int)bond.x] += fc1 * 0.07f;
         movement[(int)bond.y] += fc2 * 0.07f;
     }
@@ -175,9 +195,60 @@ public class ForceField : MonoBehaviour
        
     }
 
-    // implement forces to movement of each atom
-    void applyForces()
+    // turn forces into movements and apply sanity checks 
+    void calcMovements()
     {
+        //COMMENT5
+        // in principle, the scaling by atomic masses and by a time-step factor should be applied here
+        // currently, this is the factor 0.07f applied above
+
+
+        //COMMENT6
+
+        Vector3 CurCOM = new Vector3(0, 0, 0); // current center of mass
+        nAtoms = position.Count;
+        foreach(var pair in position)
+        {
+            CurCOM += pair.Value;  // times (relative) mass of the atom (to be implemented)
+        }
+        CurCOM = CurCOM / (float)nAtoms;
+        Vector3 AngMom = new Vector3(0, 0, 0);
+        foreach(var pair in movement)
+        {
+            Vector3 vel = pair.Value;
+            Vector3 pos = positions[pair.Key] - CurCOM; // maybe this can be done more cleanly
+            AngMom.x += pos.y * vel.z; // times (relative) mass
+            AngMom.y += pos.z * vel.x;
+            AngMom.z += pos.x * vel.y;
+        }
+		// so far, we have computed the angular momentum of the structure, need now code to apply a damping of the rotation
+		// AK will take care of that
+
+        // check for too long steps:
+        float MaxMove = 1f; // 0.01f; // to be checked; with 1f practically disabled
+        float moveMaxNorm = 0f; // norm of movement vector
+        foreach (var pair in movement)
+        {
+            float moveNorm = pair.Value.x * pair.Value.x + pair.Value.y * pair.Value.y + pair.Value.z * pair.Value.z;
+            moveMaxNorm = Math.Max(moveMaxNorm, moveNorm);
+        }
+        if (moveMaxNorm > MaxMove)
+        {
+            float scaleMove = MaxMove / moveMaxNorm;
+            foreach (var pair in movement)
+            {
+                pair.Value = pair.Value * scaleMove;
+            }
+        }
+
+    }
+
+    // COMMENT7
+    // renamed this one to distinguish forces and movements (=volocities x timestep)
+    // apply movement to each atom
+    void applyMovements()
+    {
+
         Vector3 test = new Vector3(0, 0, 0);
         foreach(var pair in movement)
         {
