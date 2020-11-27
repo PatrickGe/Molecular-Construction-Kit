@@ -279,7 +279,7 @@ public class Auswahlgeste: MonoBehaviour
             {
                 senseGlove_Object.SendBuzzCmd(new bool[5] { true, false, false, false, false }, 100, 50);
                 this.GetComponent<GlobalCtrl>().recycle();
-            } else if (hit.collider.name.StartsWith("kohlenstoff") && (guiSave.activeInHierarchy == false))
+            } else if (hit.collider.name.StartsWith("atom") && (guiSave.activeInHierarchy == false))
             {
                 senseGlove_Object.SendBuzzCmd(new bool[5] { true, false, false, false, false }, 100, 50);
                 //einzelnes Kohlenstoff Atom ausgewählt -- Bearbeitungsmodus öffnen

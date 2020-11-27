@@ -47,7 +47,7 @@ public class EditMode : MonoBehaviour
                 {
                     if (cs.isConnected == true)
                     {
-                        carbonConnected = GameObject.Find("kohlenstoff" + cs.otherAtomID).GetComponent<Atom>();
+                        carbonConnected = GameObject.Find("atom" + cs.otherAtomID).GetComponent<Atom>();
                         GameObject.Find("UI" + cs.name).transform.position = carbonConnected.transform.position + new Vector3(0, 0.1f, 0);
                         GameObject.Find("UI" + cs.name).transform.GetChild(0).GetComponent<Text>().text = showRotation(cs).ToString() + "°";
                     }
@@ -60,7 +60,7 @@ public class EditMode : MonoBehaviour
                 {
                     if (fixedCP.isConnected == true)
                     {
-                        carbonConnected = GameObject.Find("kohlenstoff" + fixedCP.otherAtomID).GetComponent<Atom>();
+                        carbonConnected = GameObject.Find("atom" + fixedCP.otherAtomID).GetComponent<Atom>();
                         if (carbonConnected.transform.parent.name == "editTeil")
                         {
                             otherCP = carbonConnected.getConPoint(fixedCP.otherPointID);
@@ -98,7 +98,7 @@ public class EditMode : MonoBehaviour
                 if (cs.isConnected == true)
                 {
                     GameObject.Find("con" + cs.conID).transform.parent = GameObject.Find("editTeil").transform;
-                    Atom next = GameObject.Find("kohlenstoff" + cs.otherAtomID).GetComponent<Atom>();
+                    Atom next = GameObject.Find("atom" + cs.otherAtomID).GetComponent<Atom>();
                     regroupAtoms(next);
                 }
             }
@@ -120,7 +120,7 @@ public class EditMode : MonoBehaviour
             {
                 if (carbonCP.isConnected)
                 {
-                    carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<Atom>();
+                    carbonConnected = GameObject.Find("atom" + carbonCP.otherAtomID).GetComponent<Atom>();
 
                     distance = Vector3.Distance(atom.transform.position, carbonConnected.transform.position);
                     distanceDiff = distance - standardDistance;
@@ -161,7 +161,7 @@ public class EditMode : MonoBehaviour
             if (carbonCP.isConnected == true)
             {
                 //Wenn größer als Mindestabstand - direkte Verbindung zu fixedAtom
-                carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<Atom>();
+                carbonConnected = GameObject.Find("atom" + carbonCP.otherAtomID).GetComponent<Atom>();
                 if (carbonConnected._id != fixedAtom._id)
                 {
                     Vector3 carbonVec = carbonConnected.transform.localPosition - atom.transform.localPosition;
@@ -177,7 +177,7 @@ public class EditMode : MonoBehaviour
                 connection.transform.LookAt(carbonConnected.transform.position);
             }
         }
-        foreach (GameObject otherGO in GameObject.FindGameObjectsWithTag("Kohlenstoff"))
+        foreach (GameObject otherGO in GameObject.FindGameObjectsWithTag("Atom"))
         {
             Atom otherAtom = otherGO.GetComponent<Atom>();
             distance = Vector3.Distance(atom.transform.localPosition, otherAtom.transform.localPosition);
@@ -206,7 +206,7 @@ public class EditMode : MonoBehaviour
         }
         if (moveNext.Count > 0)
         {
-            applyForce(GameObject.Find("kohlenstoff" + moveNext.Dequeue()).GetComponent<Atom>());
+            applyForce(GameObject.Find("atom" + moveNext.Dequeue()).GetComponent<Atom>());
         }
 
     }
@@ -233,7 +233,7 @@ public class EditMode : MonoBehaviour
         {
             ConnectionStatus point;
             ConnectionStatus otherPoint;
-            Atom conAtom = GameObject.Find("kohlenstoff" + conPoint.otherAtomID).GetComponent<Atom>();
+            Atom conAtom = GameObject.Find("atom" + conPoint.otherAtomID).GetComponent<Atom>();
             Vector3 vecPlane = conAtom.transform.position - fixedAtom.transform.position;
             if (fixedAtom.getConPoint(0) != conPoint)
             {

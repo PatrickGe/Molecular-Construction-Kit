@@ -132,6 +132,12 @@ namespace Valve.VR.Extras
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     this.GetComponentInParent<GlobalCtrl>().createCarbon(this.transform.position);
                 }
+                //Create new hydrogen atom
+                else if (hit.collider.name == "PeriodensystemH" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                {
+                    vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
+                    this.GetComponentInParent<GlobalCtrl>().createHydrogen(this.transform.position);
+                }
                 //Delete atoms or whole molecule
                 else if (hit.collider.name == "recycle bin" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
@@ -139,7 +145,7 @@ namespace Valve.VR.Extras
                     this.GetComponentInParent<GlobalCtrl>().recycle();
                 }
                 //Mark an existing atom to edit / delete it
-                else if (hit.collider.name.StartsWith("kohlenstoff") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                else if (hit.collider.name.StartsWith("atom") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     //if it isn't selected before,start edit mode
@@ -156,7 +162,7 @@ namespace Valve.VR.Extras
                         hit.collider.gameObject.GetComponent<SenseGlove_Grabable>().editMarker = false;
                         GameObject.Find("Molekül").GetComponent<EditMode>().editMode = false;
                         GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom = null;
-                        hit.collider.gameObject.GetComponent<Renderer>().material.color = new Color32(0, 0, 0, 255);
+                        hit.collider.transform.GetComponent<Atom>().setOriginalColor();
                     }
                 }
                 //Select the whole molecule -- moves as a solid structure

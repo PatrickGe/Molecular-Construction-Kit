@@ -23,13 +23,13 @@ public class ForceField : MonoBehaviour
     float scalingFactor = 1f/440f; // with this, 154 pm are equivalent to 0.35 m in the model
     float kb = 1.0f;    // should be integrated into new bondList structure
     float ka = 0.0001f; // should be integrated into new angleList structure
-    float standardDistance = 154f*scalingFactor; // integrate into new bondList
+    float standardDistance; // integrate into new bondList
     float alphaNull = 109.4712f; // integrate into new angleList
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        standardDistance = 154f * scalingFactor;
     }
 
     // Update is called once per frame
@@ -206,7 +206,7 @@ public class ForceField : MonoBehaviour
         //COMMENT6
 
         Vector3 CurCOM = new Vector3(0, 0, 0); // current center of mass
-        nAtoms = position.Count;
+        int nAtoms = position.Count;
         foreach(var pair in position)
         {
             CurCOM += pair.Value;  // times (relative) mass of the atom (to be implemented)
@@ -216,11 +216,12 @@ public class ForceField : MonoBehaviour
         foreach(var pair in movement)
         {
             Vector3 vel = pair.Value;
-            Vector3 pos = positions[pair.Key] - CurCOM; // maybe this can be done more cleanly
+            Vector3 pos = position[pair.Key] - CurCOM; // maybe this can be done more cleanly
             AngMom.x += pos.y * vel.z; // times (relative) mass
             AngMom.y += pos.z * vel.x;
             AngMom.z += pos.x * vel.y;
         }
+        //print(AngMom.x + "  :  " + AngMom.y  + "  :  " + AngMom.z);
 		// so far, we have computed the angular momentum of the structure, need now code to apply a damping of the rotation
 		// AK will take care of that
 
@@ -229,15 +230,15 @@ public class ForceField : MonoBehaviour
         float moveMaxNorm = 0f; // norm of movement vector
         foreach (var pair in movement)
         {
-            float moveNorm = pair.Value.x * pair.Value.x + pair.Value.y * pair.Value.y + pair.Value.z * pair.Value.z;
-            moveMaxNorm = Math.Max(moveMaxNorm, moveNorm);
+            float moveNorm = Vector3.SqrMagnitude(pair.Value);
+            moveMaxNorm = Mathf.Max(moveMaxNorm, moveNorm);
         }
         if (moveMaxNorm > MaxMove)
         {
             float scaleMove = MaxMove / moveMaxNorm;
             foreach (var pair in movement)
             {
-                pair.Value = pair.Value * scaleMove;
+                movement[pair.Key] = pair.Value * scaleMove;
             }
         }
 
@@ -266,13 +267,17 @@ public class ForceField : MonoBehaviour
     // connections between atoms get scaled new as soon as the position of an atom gets updated
     public void scaleConnections()
     {
+        print("here");
         foreach(Atom atom in this.GetComponent<GlobalCtrl>().list_curAtoms)
         {
+            print("1: " + atom);
             foreach(ConnectionStatus carbonCP in atom.getAllConPoints())
             {
+                print("2: " + atom);
                 if (carbonCP.isConnected)
                 {
-                    Atom carbonConnected = GameObject.Find("kohlenstoff" + carbonCP.otherAtomID).GetComponent<Atom>();
+                    print(carbonCP + "  :  " + atom);
+                    Atom carbonConnected = GameObject.Find("atom" + carbonCP.otherAtomID).GetComponent<Atom>();
 
                     float distance = Vector3.Distance(atom.transform.position, carbonConnected.transform.position);
                     float distanceDiff = distance - standardDistance;

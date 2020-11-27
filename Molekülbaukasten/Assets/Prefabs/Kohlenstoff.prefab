@@ -58,7 +58,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 86a433c0fe61d00488d728c3f7a515b5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -152,7 +152,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 86a433c0fe61d00488d728c3f7a515b5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -208,7 +208,7 @@ GameObject:
   - component: {fileID: 1007098195870191215}
   m_Layer: 0
   m_Name: Kohlenstoff
-  m_TagString: Kohlenstoff
+  m_TagString: Atom
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -387,6 +387,8 @@ MonoBehaviour:
   _id: 0
   abstand: 0
   isFull: 0
+  weight: 0
+  type: 
   c0: {fileID: 5597075715590055710}
   c1: {fileID: 83025805178801135}
   c2: {fileID: 264904408179915611}
@@ -412,20 +414,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allGameObjects: []
-  open: []
-  list_curCarbonAtoms: []
+  list_curAtoms: []
   KohlenstoffPrefab: {fileID: 8531711032114631031}
   VerbindungCC: {fileID: 9133145376059441668, guid: 7d05a8fe37e4da44ea16a2866fc9f0d3,
     type: 3}
-  hand: {fileID: 0}
-  molecule: {fileID: 0}
-  up: {fileID: 0}
-  down: {fileID: 0}
   changingText: {fileID: 0}
   childSelected: {fileID: 0}
   childGrabbedSelected: {fileID: 0}
   scale: 0
   winkelDiff: 0
+  allAtom: 1
+  forceField: 0
 --- !u!1 &8795669253747649983
 GameObject:
   m_ObjectHideFlags: 0
@@ -484,7 +483,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 86a433c0fe61d00488d728c3f7a515b5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -578,7 +577,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 86a433c0fe61d00488d728c3f7a515b5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

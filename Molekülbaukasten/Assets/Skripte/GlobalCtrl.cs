@@ -87,7 +87,7 @@ public class GlobalCtrl : MonoBehaviour
             else if (obj.name == "Down")
             {
                 down = obj;
-            } else if (obj.name.StartsWith("kohlenstoff"))
+            } else if (obj.name.StartsWith("atom"))
             {
                 list_curAtoms.Add(obj.GetComponent<Atom>());
             }
@@ -130,9 +130,17 @@ public class GlobalCtrl : MonoBehaviour
     {   
         _id += 1;
         GameObject kohlenstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
-        kohlenstoffatom.GetComponent<Atom>().f_Init(_id);
+        kohlenstoffatom.GetComponent<Atom>().f_InitCarbon(_id);
         kohlenstoffatom.transform.position = pos + new Vector3(0, 0, 0.2f);
         list_curAtoms.Add(kohlenstoffatom.GetComponent<Atom>());
+    }
+    public void createHydrogen(Vector3 pos)
+    {
+        _id += 1;
+        GameObject wasserstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
+        wasserstoffatom.GetComponent<Atom>().f_InitHydrogen(_id);
+        wasserstoffatom.transform.position = pos + new Vector3(0, 0, 0.2f);
+        list_curAtoms.Add(wasserstoffatom.GetComponent<Atom>());
     }
 
     public void createConnection(List<Atom> senden)
@@ -174,8 +182,8 @@ public class GlobalCtrl : MonoBehaviour
         senden[1].transform.rotation = rotation;
 
         //create the visual connection between them
-        childGrabbedSelected.gameObject.SetActive(false);
-        childSelected.gameObject.SetActive(false);
+        childGrabbedSelected.gameObject.GetComponent<Renderer>().material.color = Color.clear;
+        childSelected.gameObject.GetComponent<Renderer>().material.color = Color.clear;
         GameObject connection = Instantiate(VerbindungCC, senden[0].transform.position, Quaternion.identity);
         connection.transform.LookAt(senden[1].transform.position);
         connection.transform.parent = GameObject.Find("Molekül").transform;
@@ -249,7 +257,9 @@ public class GlobalCtrl : MonoBehaviour
         {
             GameObject atomObj = Instantiate(KohlenstoffPrefab, atom.pos, Quaternion.Euler(atom.rot));
             Atom atomDef = atomObj.GetComponent<Atom>();
-            atomDef.f_Init(atom.id);
+            //NEEDS REWORK HERE BECAUSE OF NEW ATOM STRUCTURE
+
+            //atomDef.f_Init(atom.id);
             atomDef.transform.parent = GameObject.Find("Molekül").transform;
             atomDef.c0.isConnected = atom.info0.isConnected;
             atomDef.c1.isConnected = atom.info1.isConnected;
@@ -424,7 +434,7 @@ public class GlobalCtrl : MonoBehaviour
                     otherPoint.otherAtomID = -1;
                     otherPoint.otherPointID = -1;
                     otherPoint.conID = -1;
-                    otherPoint.gameObject.SetActive(true);
+                    otherPoint.gameObject.GetComponent<Renderer>().material.color = Color.clear;
                     Destroy(GameObject.Find("con" + connection.conID));
                 }
             }

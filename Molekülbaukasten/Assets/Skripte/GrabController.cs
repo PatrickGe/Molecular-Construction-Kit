@@ -7,7 +7,7 @@ public class GrabController : MonoBehaviour
 {
     public SteamVR_Action_Boolean triggerklicked = SteamVR_Input.GetBooleanAction("Triggerklick");
     private SteamVR_Behaviour_Pose m_pose = null;
-
+    
     private Atom m_currentAtom = null;
     private Atom connectAtom = null;
     public List<Atom> m_Interactables = new List<Atom>();
@@ -68,7 +68,7 @@ public class GrabController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.gameObject.CompareTag("Kohlenstoff"))
+        if (!other.gameObject.CompareTag("Atom"))
         {
             return;
         }
@@ -78,7 +78,7 @@ public class GrabController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (!other.gameObject.CompareTag("Kohlenstoff"))
+        if (!other.gameObject.CompareTag("Atom"))
         {
             return;
         }
@@ -142,7 +142,7 @@ public class GrabController : MonoBehaviour
                     connectAtom.GetComponent<Renderer>().material.color = new Color(1, 0, 0, 1);
                 } else
                 {
-                    connectAtom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
+                    connectAtom.setOriginalColor();
                 }
                 
                 this.GetComponentInParent<GlobalCtrl>().createConnection(senden);
@@ -224,7 +224,7 @@ public class GrabController : MonoBehaviour
                         {
                             if (connectAtom != atom)
                             {
-                                connectAtom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
+                                connectAtom.setOriginalColor();
                             }
                         }
                         atom.GetComponent<Renderer>().material.color = new Color(0, 1, 0, 1);
@@ -237,7 +237,7 @@ public class GrabController : MonoBehaviour
                 //Reset color
                 if (atom != GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
                 {
-                    atom.GetComponent<Renderer>().material.color = new Color(0, 0, 0, 1);
+                    atom.setOriginalColor();
                 }
             }
         }
