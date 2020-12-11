@@ -66,13 +66,16 @@ public class GlobalCtrl : MonoBehaviour
 
     public Dictionary<int, Vector3> atomMap = new Dictionary<int, Vector3>();
 
-    float standardDistance = 0.35f;
 
     // Start is called before the first frame update
     void Start()
     {
-        //position = new Vector3[1000, 1000];
-        scale = 0.1f;
+        //THIS IS THE GLOBAL SCALE FACTOR IN METER TO SCALE THE MOLECULE. Do not change during runtime!
+        //The scale describes exactly the length of a single bond. Atoms are half of the scale size.
+        //Example: scale of 0.2f renders an atom with a diameter of 10cm and the bonds in the molecule will have a length of 20cm
+        scale = 0.2f;
+
+
         allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
         foreach (GameObject obj in allGameObjects)
         {
@@ -132,6 +135,7 @@ public class GlobalCtrl : MonoBehaviour
         GameObject kohlenstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
         kohlenstoffatom.GetComponent<Atom>().f_InitCarbon(_id);
         kohlenstoffatom.transform.position = pos + new Vector3(0, 0, 0.2f);
+        kohlenstoffatom.transform.localScale = new Vector3(scale * 0.5f, scale * 0.5f, scale * 0.5f);
         list_curAtoms.Add(kohlenstoffatom.GetComponent<Atom>());
     }
     public void createHydrogen(Vector3 pos)
@@ -176,7 +180,8 @@ public class GlobalCtrl : MonoBehaviour
         childSelected.isConnected = true;
 
         // positioning of the linked atoms
-        senden[1].transform.position = senden[0].transform.position + Quaternion.Euler(senden[0].transform.rotation.eulerAngles) * ((childSelected.transform.localPosition / childSelected.transform.parent.localScale.x) * scale);
+        Vector3 offset = Vector3.Normalize(Quaternion.Euler(senden[0].transform.rotation.eulerAngles) * (childSelected.transform.localPosition / childSelected.transform.parent.localScale.x));
+        senden[1].transform.position = senden[0].transform.position + offset * scale;
         Vector3 direction = childSelected.transform.position - senden[1].transform.position;
         Quaternion rotation = Quaternion.FromToRotation(childGrabbedSelected.transform.localPosition, direction);
         senden[1].transform.rotation = rotation;
@@ -188,11 +193,12 @@ public class GlobalCtrl : MonoBehaviour
         connection.transform.LookAt(senden[1].transform.position);
         connection.transform.parent = GameObject.Find("Molekül").transform;
         connection.transform.name = "con" + _conID;
-        float distance = Vector3.Distance(childSelected.transform.position, childGrabbedSelected.transform.position);
-        if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode == true)
-        {
-            connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, connection.transform.localScale.z + (distance * 1));
-        }
+        float distance = Vector3.Distance(senden[1].transform.localPosition, senden[0].transform.localPosition);
+
+
+
+        connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, distance/2);
+        
         //additional information is set, so each atom knows the id of it's connected atoms
         childSelected.otherAtomID = senden[1].GetComponent<Atom>()._id;
         childGrabbedSelected.otherAtomID = senden[0].GetComponent<Atom>()._id;
@@ -204,14 +210,6 @@ public class GlobalCtrl : MonoBehaviour
         //reset used variables
         childGrabbedSelected = null;
         childSelected = null;
-        //Alle Atome und deren Abstände zu den Nachbarn berechnen
-        //for (int i = 0; i <= list_curAtoms.Count - 1; i++)
-        //{
-        //    for (int j = 0; j <= list_curAtoms.Count - 1; j++)
-        //    {
-        //        position[i, j] = list_curAtoms[j].transform.position - list_curAtoms[i].transform.position;
-        //    }
-        //}
     }
 
     public List<atomData> saveMolecule()

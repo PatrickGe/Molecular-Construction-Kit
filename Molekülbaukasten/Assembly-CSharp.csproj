@@ -268,6 +268,7 @@
     <None Include="Assets\MoleculeFiles\778.xml" />
     <None Include="Assets\SenseGlove\Data\UserProfiles.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
+    <None Include="Assets\Skripte\ForceFieldOld.cs.deact.txt" />
     <None Include="Assets\MoleculeFiles\D2.xml" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />

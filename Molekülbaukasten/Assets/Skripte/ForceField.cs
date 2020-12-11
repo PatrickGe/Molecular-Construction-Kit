@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System;
 using UnityEngine;
 
 public class ForceField : MonoBehaviour
@@ -9,43 +10,70 @@ public class ForceField : MonoBehaviour
     // COMMENT1
     // bonds and angles will have individual force constants and equilibrium values
     // thus we have to use other structures (or classes?) here, e.g.
-    // public struct CovBond
-    // {
+    //struct CovBond
+    //{
     //    public int Atom1; public int Atom2; public float kBond; public float r_eq;
-    // }
-    // public List<CovBond> NewBondList = new List<CovBond>(); // not sure this contructor works
+    //}
+    //List<CovBond> bondList = new List<CovBond>(); 
 
     public List<Vector2> bondList = new List<Vector2>();
     public List<Vector3> angleList = new List<Vector3>();
-    // COMMENT2
-    // for control of our movements, we need a list with all atom positions
-    Dictionary<int, Vector3> position = new Dictionary<int, Vector3>();
-    public Dictionary<int, Vector3> movement = new Dictionary<int, Vector3>();
+    
+    List<int> atomList = new List<int>();
+    List<float> atomMass = new List<float>();
+    List<Vector3> position = new List<Vector3>();
+    public List<Vector3> movement = new List<Vector3>();
+    int nAtoms;
 
-    float scalingFactor = 1f/440f; // with this, 154 pm are equivalent to 0.35 m in the model
-    float kb = 100.0f;    // should be integrated into new bondList structure
-    float ka = 0.01f; // should be integrated into new angleList structure
-    float standardDistance; // integrate into new bondList
+    //float scalingFactor = 154 / (154 / GetComponent<GlobalCtrl>().scale); // with this, 154 pm are equivalent to 0.35 m in the model
+    // note that the forcefield works in the atomic scale (i.e. all distances measure in pm)
+    // we scale back when applying the movements to the actual objects
+
+    float kb = 3.0f;    // should be integrated into new bondList structure
+    float ka = 120.0f; // should be integrated into new angleList structure (must be this large ... or even larger!)
+    float standardDistance = 154f; // integrate into new bondList
     float alphaNull = 109.4712f; // integrate into new angleList
     int frame = 0;
-    StreamWriter sr;
+
+    // for Debugging; level = 100 only input coords + output movements
+    //                level = 1000 more details on forces
+    //                level = 10000 maximum detail level
+    StreamWriter FFlog;
+    int LogLevel = 0;
+
     // Start is called before the first frame update
     void Start()
     {
-        sr = File.CreateText("logfile.txt");
-        standardDistance = 154f * scalingFactor;
+        if (LogLevel > 0)
+        {
+            FFlog = File.CreateText("logfile.txt");
+            FFlog.WriteLine("ForceField logfile");
+            FFlog.WriteLine("Log starts at " + Time.time.ToString("f6"));
+            FFlog.WriteLine("LogLevel = " + LogLevel);
+        }
+        ;
+
+        standardDistance = 154f * GetComponent<GlobalCtrl>().scale; // * scalingFactor;
         
     }
     void OnApplicationQuit()
     {
-      sr.Close();
+        if (LogLevel > 0)
+        {
+            FFlog.WriteLine("Log ends at " + Time.time.ToString("f6"));
+            FFlog.Close();
+        }
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
         frame += 1;
-        sr.WriteLine("FRAME: " + frame);
+        if (LogLevel >= 100 && this.GetComponent<GlobalCtrl>().forceField)
+        {
+            FFlog.WriteLine("Current frame: " + frame);
+            FFlog.WriteLine("Current time:  " + Time.time.ToString("f6") + "  Delta: " + Time.deltaTime.ToString("f6"));
+        }
         // If the forcefield is active, update all connections and forces, else only update connections
         if (this.GetComponent<GlobalCtrl>().forceField)
         {
@@ -54,6 +82,7 @@ public class ForceField : MonoBehaviour
             bondList.Clear();
             angleList.Clear();
             generateLists();
+            generateFF();
             forces();
             scaleConnections();
         } else
@@ -67,53 +96,82 @@ public class ForceField : MonoBehaviour
      * generation / update of the connection and angle lists.
      * Will be extended later with torsions and impropers etc.
      * maybe speed up update with "what is new"
-     */ 
+     */
     void generateLists()
     {
-        //clear previous movement and position map
+        // init lists
+        atomList.Clear();
+        atomMass.Clear();
         movement.Clear();
         position.Clear();
+        nAtoms = 0;
+        // cycle Atoms
+        foreach(Atom At in GetComponent<GlobalCtrl>().list_curAtoms)
+        {
+            nAtoms++;
+            atomList.Add(At._id);
+            // TODO: put actual masses here (which should be part of Atom object)
+            atomMass.Add(At.mass);
+            // Get atoms and scale to new unit system (in pm)
+            position.Add((At.transform.localPosition*(1f/ GetComponent<GlobalCtrl>().scale)));
+            movement.Add(new Vector3(0.0f, 0.0f, 0.0f));
+        }
+        // TODO: when FF is not generated in each frame, we have to check that the atomList matches!
+        if (LogLevel >= 100)
+        {
+            FFlog.WriteLine("Current positions:");
+            for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+            {
+                FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}",
+                    iAtom, atomList[iAtom],
+                    position[iAtom].x, position[iAtom].y, position[iAtom].z));
+            }
+        }
+    }
+
+
+    void generateFF()
+    {
+        int iAtom = -1;
         //cycle through all atoms
         foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)
         {
-            //fill movement map
-            if (!movement.ContainsKey(c1._id))
-            {
-                movement.Add(c1._id, new Vector3(0, 0, 0));
-                position.Add(c1._id, c1.transform.localPosition);
-            }
+            iAtom++;
+            int jAtom = -1;
             //compare with all atoms
             foreach(Atom c2 in GetComponent<GlobalCtrl>().list_curAtoms)
             {
+                jAtom++;
                 //cycle through all connection points
                 foreach(ConnectionStatus conPoint in c1.getAllConPoints())
                 {
                     //if a connection exists, add to list
                     if(conPoint.otherAtomID == c2._id)
                     {
-                        if(!bondList.Contains(new Vector2(c1._id, c2._id)) && !bondList.Contains(new Vector2(c2._id, c1._id)))
+                        if(!bondList.Contains(new Vector2(iAtom, jAtom)) &&
+                           !bondList.Contains(new Vector2(jAtom, iAtom)))
                         {
                             //angle list
                             foreach (Vector2 vec in bondList)
                             {
-                                if (vec.x == c1._id)
+                                if (vec.x == iAtom)
                                 {
-                                    angleList.Add(new Vector3(vec.y, c1._id, c2._id));
-                                } else if (vec.x == c2._id)
+                                    angleList.Add(new Vector3(vec.y, iAtom, jAtom));
+                                } else if (vec.x == jAtom)
                                 {
-                                    angleList.Add(new Vector3(vec.y, c2._id, c1._id));
+                                    angleList.Add(new Vector3(vec.y, jAtom, iAtom));
                                 }
-                                else if (vec.y == c1._id)
+                                else if (vec.y == iAtom)
                                 {
-                                    angleList.Add(new Vector3(vec.x, c1._id, c2._id));
+                                    angleList.Add(new Vector3(vec.x, iAtom, jAtom));
                                 }
-                                else if (vec.y == c2._id)
+                                else if (vec.y == jAtom)
                                 {
-                                    angleList.Add(new Vector3(vec.x, c2._id, c1._id));
+                                    angleList.Add(new Vector3(vec.x, jAtom, iAtom));
                                 }
                             }
                             //bond list
-                            bondList.Add(new Vector2(c1._id, c2._id));
+                            bondList.Add(new Vector2(iAtom, jAtom));
                         }
                         
                         break;
@@ -148,111 +206,177 @@ public class ForceField : MonoBehaviour
     // calculate bond forces
     void calcBondForces(Vector2 bond)
     {
-        
+        if (LogLevel >= 1000) FFlog.WriteLine("calcBondForces for {0} - {1}", (int)bond.x, (int)bond.y);
         //bond vector
-        Vector3 rb = getAtomByID(bond.x).transform.localPosition - getAtomByID(bond.y).transform.localPosition;
+        Vector3 rb = position[(int)bond.x] - position[(int)bond.y];
         //force on this bond vector
-        float fb =  -kb *  (Vector3.Magnitude(rb) - standardDistance) ;
+        float delta = rb.magnitude - standardDistance;
+        //float fb = -kb * (Vector3.Magnitude(rb) - standardDistance);
+        float fb = -kb * delta;
+        if (LogLevel >= 1000) FFlog.WriteLine("dist: {0,12:f3}  dist0: {1,12:f3}  --  force = {2,14:f5} ",rb.magnitude,standardDistance,fb);
         //separate the forces on the two atoms
-        Vector3 fc1 = fb * (rb / Vector3.Magnitude(rb));
+        Vector3 fc1 =  fb * (rb / Vector3.Magnitude(rb));
         Vector3 fc2 = -fb * (rb / Vector3.Magnitude(rb));
 
-        // COMMENT4: the scaling (by 0.07) should be applied later. In principle the scaling will depend on the atomic masses
-        movement[(int)bond.x] += fc1 * 0.07f;
-        movement[(int)bond.y] += fc2 * 0.07f;
+        if (LogLevel >= 10000)
+        {
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)bond.x, fc1.x, fc1.y, fc1.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)bond.y, fc2.x, fc2.y, fc2.z));
+        }
+
+        movement[(int)bond.x] += fc1;
+        movement[(int)bond.y] += fc2;
+
+        if (LogLevel >= 10000)
+        {
+            FFlog.WriteLine("Updated forces:");
+            for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+            {
+                FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}",
+                    iAtom, atomList[iAtom],
+                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z));
+            }
+        }
     }
 
     // calculate angle forces
     void calcAngleForces(Vector3 angle)
     {
-        Vector3 rb1 = getAtomByID(angle.x).transform.localPosition - getAtomByID(angle.y).transform.localPosition;
-        Vector3 rb2 = getAtomByID(angle.z).transform.localPosition - getAtomByID(angle.y).transform.localPosition;
+        if (LogLevel >= 1000) FFlog.WriteLine("calcAngleForces for {0} - {1} - {2}", (int)angle.x, (int)angle.y, (int)angle.z);
+        Vector3 rb1 = position[(int)angle.x] - position[(int)angle.y];
+        Vector3 rb2 = position[(int)angle.z] - position[(int)angle.y];
 
         float cosAlpha = (Vector3.Dot(rb1, rb2)) / (Vector3.Magnitude(rb1) * Vector3.Magnitude(rb2));
         //float angleAlpha = Mathf.Acos(cosAlpha) * (180 / Mathf.PI);
-        float mAlpha = -ka * (Mathf.Acos(cosAlpha) * (180.0f / Mathf.PI) - alphaNull);
+        float mAlpha = ka * (Mathf.Acos(cosAlpha) * (180.0f / Mathf.PI) - alphaNull);
 
-        Vector3 fI = (mAlpha / (Vector3.Magnitude(rb1) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb1 / Vector3.Magnitude(rb1)) - cosAlpha*(rb2 / Vector3.Magnitude(rb2)));
-        Vector3 fK = (mAlpha / (Vector3.Magnitude(rb2) * Mathf.Sqrt(1 - cosAlpha * cosAlpha))) * ((rb2 / Vector3.Magnitude(rb2)) - cosAlpha * (rb1 / Vector3.Magnitude(rb1)));
+        // check: rb1 and rb2 were mixed up in vector part
+        Vector3 fI = (mAlpha / (Vector3.Magnitude(rb1) * Mathf.Sqrt(1.0f - cosAlpha * cosAlpha))) * ((rb2 / Vector3.Magnitude(rb2)) - cosAlpha * (rb1 / Vector3.Magnitude(rb1)));
+        Vector3 fK = (mAlpha / (Vector3.Magnitude(rb2) * Mathf.Sqrt(1.0f - cosAlpha * cosAlpha))) * ((rb1 / Vector3.Magnitude(rb1)) - cosAlpha * (rb2 / Vector3.Magnitude(rb2)));
         Vector3 fJ = -fI - fK;
 
-        // angle forces much too strong, maybe mistake or scale them down again
-        if (true/*(angleAlpha <= 170.0f || angleAlpha >= 190.0f) && (angleAlpha >= 5.0f)*/)
+        if (LogLevel >= 1000) FFlog.WriteLine("angle: {0,12:f3}  angle0: {1,12:f3}  --  moment = {2,14:f5} ", Mathf.Acos(cosAlpha) * (180.0f / Mathf.PI), alphaNull, mAlpha);
+
+        if (LogLevel >= 10000)
         {
-            movement[(int)angle.x] += fI * 0.07f;
-            movement[(int)angle.y] += fK * 0.07f;
-            movement[(int)angle.z] += fJ * 0.07f;
-
-            
-        }       
-    }
-
-    // turn forces into movements and apply sanity checks 
-    void calcMovements()
-    {
-        //COMMENT5
-        // in principle, the scaling by atomic masses and by a time-step factor should be applied here
-        // currently, this is the factor 0.07f applied above
-
-
-        //COMMENT6
-
-        Vector3 CurCOM = new Vector3(0, 0, 0); // current center of mass
-        int nAtoms = position.Count;
-        foreach(var pair in position)
-        {
-            CurCOM += pair.Value;  // times (relative) mass of the atom (to be implemented)
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)angle.x, fI.x, fI.y, fI.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)angle.y, fJ.x, fJ.y, fJ.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)angle.z, fK.x, fK.y, fK.z));
         }
-        CurCOM = CurCOM / (float)nAtoms;
-        Vector3 AngMom = new Vector3(0, 0, 0);
-        foreach(var pair in movement)
-        {
-            Vector3 vel = pair.Value;
-            Vector3 pos = position[pair.Key] - CurCOM; // maybe this can be done more cleanly
-            AngMom.x += pos.y * vel.z; // times (relative) mass
-            AngMom.y += pos.z * vel.x;
-            AngMom.z += pos.x * vel.y;
-        }
-        //print(AngMom.x + "  :  " + AngMom.y  + "  :  " + AngMom.z);
-		// so far, we have computed the angular momentum of the structure, need now code to apply a damping of the rotation
-		// AK will take care of that
 
-        // check for too long steps:
-        float MaxMove = 0.002f; // 0.01f; // to be checked; with 1f practically disabled
-        float moveMaxNorm = 0f; // norm of movement vector
-        foreach (var pair in movement)
+        movement[(int)angle.x] += fI;
+        movement[(int)angle.y] += fJ; //  fJ and fK were interchanged ....
+        movement[(int)angle.z] += fK;
+
+        if (LogLevel >= 10000)
         {
-            float moveNorm = Vector3.SqrMagnitude(pair.Value);
-            moveMaxNorm = Mathf.Max(moveMaxNorm, moveNorm);
-        }
-        if (moveMaxNorm > MaxMove)
-        {
-            
-            float scaleMove = MaxMove / moveMaxNorm;
-            //print("Max, Scale: " + moveMaxNorm + ":" + scaleMove);
-            foreach (var pair in position)
+            FFlog.WriteLine("Updated forces:");
+            for (int iAtom = 0; iAtom < nAtoms; iAtom++)
             {
-                movement[pair.Key] *= scaleMove;
+                FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}",
+                    iAtom, atomList[iAtom],
+                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z));
             }
         }
 
     }
 
-    // COMMENT7
-    // renamed this one to distinguish forces and movements (=volocities x timestep)
-    // apply movement to each atom
+    // turn forces into movements and apply sanity checks 
+    void calcMovements()
+    {
+        
+        if (LogLevel >= 1000)
+        {
+            FFlog.WriteLine("Computed forces and applicable masses:");
+            for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+            {
+                FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}    m = {5,9:f3} ",
+                    iAtom, atomList[iAtom],
+                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z, atomMass[iAtom]));
+            }
+        }
+
+        Vector3 CurCOM = new Vector3(0, 0, 0); // current center of mass
+        
+        foreach(var coord in position)
+        {
+            CurCOM += coord;  // times (relative) mass of the atom (to be implemented)
+        }
+        CurCOM = CurCOM / (float)nAtoms;
+
+
+        // force -> momentum change: divide by mass
+        // momentum change to position change: apply time factor
+        float timeFactor = 2f;
+        for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+        {
+            // negative masses flag a fixed atom
+            if (atomMass[iAtom] > 0.0f)
+            {
+                movement[iAtom] *= timeFactor/atomMass[iAtom];
+            }
+            else
+            {
+                movement[iAtom] = new Vector3(0.0f, 0.0f, 0.0f);
+            }
+        }
+
+        // check angular momentum ... if required
+        //Vector3 AngMom = new Vector3(0, 0, 0);
+        //for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+        //{
+        //    Vector3 vel = movement[iAtom];
+        //    Vector3 pos = position[iAtom] - CurCOM; // maybe this can be done more cleanly
+        //    AngMom.x += pos.y * vel.z; // times (relative) mass
+        //    AngMom.y += pos.z * vel.x;
+        //    AngMom.z += pos.x * vel.y;
+        //}
+        //
+		// so far, we have computed the angular momentum of the structure, need now code to apply a damping of the rotation
+		// AK will take care of that
+
+        // check for too long steps:
+        float MaxMove = 10f;
+        float moveMaxNorm = 0f; // norm of movement vector
+        for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+        {
+            float moveNorm = Vector3.Magnitude(movement[iAtom]);
+            moveMaxNorm = Mathf.Max(moveMaxNorm, moveNorm);
+        }
+        if (moveMaxNorm > MaxMove)
+        {
+            float scaleMove = MaxMove / moveMaxNorm;
+            if (LogLevel >= 100) FFlog.WriteLine("moveMaxNorm was {0:f3} - scaling by {1:f10}", moveMaxNorm, scaleMove);
+            
+            for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+            {
+                movement[iAtom] *= scaleMove;
+            }
+        }
+
+        if (LogLevel >= 100)
+        {
+            FFlog.WriteLine("Computed movements:");
+            for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+            {
+                FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}",
+                    iAtom, atomList[iAtom],
+                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z));
+            }
+        }
+
+
+    }
+
+
     void applyMovements()
     {
-
-        
-        foreach(var pair in movement)
+        for (int iAtom = 0; iAtom < nAtoms; iAtom++)
         {
-            sr.WriteLine("AtomID + aktuelle Position: " + getAtomByID(pair.Key).name + "  :  " + getAtomByID(pair.Key).transform.localPosition.x + "  :  " + getAtomByID(pair.Key).transform.localPosition.y + "  :  " + getAtomByID(pair.Key).transform.localPosition.z);
-            sr.WriteLine("AtomID + Bewegungsvektor:   " + getAtomByID(pair.Key).name + "  :  " + pair.Value.x + "  :  " + pair.Value.y + "  :  " + pair.Value.z);
-            getAtomByID(pair.Key).transform.localPosition += pair.Value;
-            
-            //print(pair.Key);
-            //print(pair.Value.x + "  :  " + pair.Value.y + "  :  " + pair.Value.z);
+            // get atom identified and update the actual object
+            // scale to Unity's unit system
+            int atID = atomList[iAtom];
+            getAtomByID(atID).transform.localPosition += movement[iAtom]* GetComponent<GlobalCtrl>().scale;            
         }
     }
 
@@ -267,9 +391,8 @@ public class ForceField : MonoBehaviour
                 {
                     Atom carbonConnected = getAtomByID(carbonCP.otherAtomID);
                     float distance = Vector3.Distance(atom.transform.position, carbonConnected.transform.position);
-                    float distanceDiff = distance - standardDistance;
                     Transform connection = GameObject.Find("con" + carbonCP.conID).transform;
-                    connection.localScale = new Vector3(connection.localScale.x, connection.localScale.y, 1 + (distanceDiff* 2.5f));
+                    connection.localScale = new Vector3(connection.localScale.x, connection.localScale.y, distance/2);
                     connection.transform.position = atom.transform.position;
                     connection.transform.LookAt(carbonConnected.transform.position);
 

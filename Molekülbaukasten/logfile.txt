@@ -1,0 +1,4 @@
+ForceField logfile
+Log starts at 0,000000
+LogLevel = 1000
+Log ends at 20,108150

@@ -131,7 +131,7 @@ public class GrabController : MonoBehaviour
         if (connectAtom != null)
         {
             //If min. distance is reached
-            if (Vector3.Distance(connectAtom.transform.position, m_currentAtom.transform.position) <= 0.25)
+            if (Vector3.Distance(connectAtom.transform.position, m_currentAtom.transform.position) <= GetComponentInParent<GlobalCtrl>().scale * 0.9f)
             {
                 //Atoms are added to list
                 List<Atom> senden = new List<Atom>();
@@ -193,7 +193,7 @@ public class GrabController : MonoBehaviour
         {
             //Checks distance between atoms
             float distance = Vector3.Distance(atom.transform.position, m_currentAtom.transform.position);
-            if (distance <= 0.25)
+            if (distance <= GetComponentInParent<GlobalCtrl>().scale * 0.9f)
             {
                 //Checks all connection points to see if they are already connected
                 bool alreadyConnected = false;
