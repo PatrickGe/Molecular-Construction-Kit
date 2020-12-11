@@ -28,7 +28,7 @@ public class ForceField : MonoBehaviour
     //float scalingFactor = 154 / (154 / GetComponent<GlobalCtrl>().scale); // with this, 154 pm are equivalent to 0.35 m in the model
     // note that the forcefield works in the atomic scale (i.e. all distances measure in pm)
     // we scale back when applying the movements to the actual objects
-
+    float scalingfactor;
     float kb = 3.0f;    // should be integrated into new bondList structure
     float ka = 120.0f; // should be integrated into new angleList structure (must be this large ... or even larger!)
     float standardDistance = 154f; // integrate into new bondList
@@ -52,8 +52,7 @@ public class ForceField : MonoBehaviour
             FFlog.WriteLine("LogLevel = " + LogLevel);
         }
         ;
-
-        standardDistance = 154f * GetComponent<GlobalCtrl>().scale; // * scalingFactor;
+        scalingfactor = GetComponent<GlobalCtrl>().scale / 154f;
         
     }
     void OnApplicationQuit()
@@ -113,7 +112,7 @@ public class ForceField : MonoBehaviour
             // TODO: put actual masses here (which should be part of Atom object)
             atomMass.Add(At.mass);
             // Get atoms and scale to new unit system (in pm)
-            position.Add((At.transform.localPosition*(1f/ GetComponent<GlobalCtrl>().scale)));
+            position.Add((At.transform.localPosition*(1f/ scalingfactor)));
             movement.Add(new Vector3(0.0f, 0.0f, 0.0f));
         }
         // TODO: when FF is not generated in each frame, we have to check that the atomList matches!
@@ -376,7 +375,7 @@ public class ForceField : MonoBehaviour
             // get atom identified and update the actual object
             // scale to Unity's unit system
             int atID = atomList[iAtom];
-            getAtomByID(atID).transform.localPosition += movement[iAtom]* GetComponent<GlobalCtrl>().scale;            
+            getAtomByID(atID).transform.localPosition += movement[iAtom]* scalingfactor;            
         }
     }
 
