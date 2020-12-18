@@ -471,7 +471,7 @@ public class ForceField : MonoBehaviour
             // get atom identified and update the actual object
             // scale to Unity's unit system
             int atID = atomList[iAtom];
-            getAtomByID(atID).transform.localPosition += movement[iAtom]* scalingfactor;            
+            getAtomByID(atID).transform.localPosition += movement[iAtom]* scalingfactor;
         }
     }
 

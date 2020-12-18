@@ -9,6 +9,7 @@ public class ConnectionStatus : MonoBehaviour
     public int otherPointID;
     public int conID;
     public connectInfo m_info;
+    public bool usable = true;
 
     // Start is called before the first frame update
     void Start()
