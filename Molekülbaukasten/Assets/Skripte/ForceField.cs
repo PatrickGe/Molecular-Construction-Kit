@@ -7,21 +7,26 @@ using UnityEngine;
 
 public class ForceField : MonoBehaviour
 {
-    // COMMENT1
-    // bonds and angles will have individual force constants and equilibrium values
-    // thus we have to use other structures (or classes?) here, e.g.
-    //struct CovBond
-    //{
-    //    public int Atom1; public int Atom2; public float kBond; public float r_eq;
-    //}
-    //List<CovBond> bondList = new List<CovBond>(); 
+    struct BondTerm
+    {
+        public int Atom1; public int Atom2; public float kBond; public float Req;
+    }
+    List<BondTerm> bondList = new List<BondTerm>();
 
-    public List<Vector2> bondList = new List<Vector2>();
-    public List<Vector3> angleList = new List<Vector3>();
+    struct AngleTerm
+    {
+        public int Atom1; public int Atom2; public int Atom3; public float kAngle; public float Aeq;
+    }
+    List<AngleTerm> angleList = new List<AngleTerm>();
+
+    //public List<Vector2> bondList = new List<Vector2>();
+    //public List<Vector3> angleList = new List<Vector3>();
     
     List<int> atomList = new List<int>();
     List<float> atomMass = new List<float>();
+    List<string> atomType = new List<string>();
     List<Vector3> position = new List<Vector3>();
+    List<Vector3> forces = new List<Vector3>();
     public List<Vector3> movement = new List<Vector3>();
     int nAtoms;
 
@@ -29,17 +34,29 @@ public class ForceField : MonoBehaviour
     // note that the forcefield works in the atomic scale (i.e. all distances measure in pm)
     // we scale back when applying the movements to the actual objects
     float scalingfactor;
-    float kb = 3.0f;    // should be integrated into new bondList structure
-    float ka = 120.0f; // should be integrated into new angleList structure (must be this large ... or even larger!)
-    float standardDistance = 154f; // integrate into new bondList
+    float timeFactor = 0.25f;
+
+    // constants for bond terms
+    const float kb = 3.0f;    // standard value
+    const float kbCC = 4.0f;
+    const float kbCH = 6.0f;
+    const float reqStd = 154f; // standard value
+    const float reqCC = 154f;
+    const float reqCH = 108f;
+    const float reqHH = 78f;
+    // constants for angle terms
+    float ka = 360.0f; // standard value (must be this large ... or even larger!)
+    //float standardDistance = 154f; // integrate into new bondList
     float alphaNull = 109.4712f; // integrate into new angleList
+
+    // counter for frames (debug only)
     int frame = 0;
 
     // for Debugging; level = 100 only input coords + output movements
     //                level = 1000 more details on forces
     //                level = 10000 maximum detail level
     StreamWriter FFlog;
-    int LogLevel = 0;
+    const int LogLevel = 000;
 
     // Start is called before the first frame update
     void Start()
@@ -77,12 +94,10 @@ public class ForceField : MonoBehaviour
         if (this.GetComponent<GlobalCtrl>().forceField)
         {
 
-		    // COMMENT2a: how could we check that the lists need an update?
-            bondList.Clear();
-            angleList.Clear();
+		    // COMMENT2a: how could we check that the FF needs an update
             generateLists();
             generateFF();
-            forces();
+            applyFF();
             scaleConnections();
         } else
         {
@@ -101,7 +116,9 @@ public class ForceField : MonoBehaviour
         // init lists
         atomList.Clear();
         atomMass.Clear();
+        atomType.Clear();
         movement.Clear();
+        forces.Clear();
         position.Clear();
         nAtoms = 0;
         // cycle Atoms
@@ -109,10 +126,11 @@ public class ForceField : MonoBehaviour
         {
             nAtoms++;
             atomList.Add(At._id);
-            // TODO: put actual masses here (which should be part of Atom object)
             atomMass.Add(At.mass);
+            atomType.Add(At.type);
             // Get atoms and scale to new unit system (in pm)
             position.Add((At.transform.localPosition*(1f/ scalingfactor)));
+            forces.Add(new Vector3(0.0f, 0.0f, 0.0f));
             movement.Add(new Vector3(0.0f, 0.0f, 0.0f));
         }
         // TODO: when FF is not generated in each frame, we have to check that the atomList matches!
@@ -131,100 +149,195 @@ public class ForceField : MonoBehaviour
 
     void generateFF()
     {
-        int iAtom = -1;
-        //cycle through all atoms
-        foreach(Atom c1 in GetComponent<GlobalCtrl>().list_curAtoms)
+        bondList.Clear();
+        angleList.Clear();
+        // set topology array
+        bool[,] topo = new bool[nAtoms, nAtoms];
+        for (int iAtom = 0; iAtom < nAtoms; iAtom++)
         {
-            iAtom++;
-            int jAtom = -1;
-            //compare with all atoms
-            foreach(Atom c2 in GetComponent<GlobalCtrl>().list_curAtoms)
+            for (int jAtom = 0; jAtom < nAtoms; jAtom++)
             {
-                jAtom++;
-                //cycle through all connection points
-                foreach(ConnectionStatus conPoint in c1.getAllConPoints())
+                topo[iAtom, jAtom] = false;
+            }
+        }
+
+        {
+            int iAtom = 0;
+            foreach (Atom At1 in GetComponent<GlobalCtrl>().list_curAtoms)
+            {
+                // cycle through connection points
+                foreach (ConnectionStatus conPoint in At1.getAllConPoints())
                 {
-                    //if a connection exists, add to list
-                    if(conPoint.otherAtomID == c2._id)
+                    // get current atom index by comparison to entries in atomList
+                    int jAtom = -1;
+                    for (int kAtom = 0; kAtom < nAtoms; kAtom++)
                     {
-                        if(!bondList.Contains(new Vector2(iAtom, jAtom)) &&
-                           !bondList.Contains(new Vector2(jAtom, iAtom)))
+                        if (atomList[kAtom] == conPoint.otherAtomID)
                         {
-                            //angle list
-                            foreach (Vector2 vec in bondList)
-                            {
-                                if (vec.x == iAtom)
-                                {
-                                    angleList.Add(new Vector3(vec.y, iAtom, jAtom));
-                                } else if (vec.x == jAtom)
-                                {
-                                    angleList.Add(new Vector3(vec.y, jAtom, iAtom));
-                                }
-                                else if (vec.y == iAtom)
-                                {
-                                    angleList.Add(new Vector3(vec.x, iAtom, jAtom));
-                                }
-                                else if (vec.y == jAtom)
-                                {
-                                    angleList.Add(new Vector3(vec.x, jAtom, iAtom));
-                                }
-                            }
-                            //bond list
-                            bondList.Add(new Vector2(iAtom, jAtom));
+                            jAtom = kAtom;
+                            break;
                         }
-                        
-                        break;
                     }
+                    if (jAtom >= 0)
+                    {
+                        topo[iAtom, jAtom] = true;
+                        topo[jAtom, iAtom] = true;
+                    }
+                }
+                iAtom++;
+            }
+        }
+
+        // now set all FF terms
+        // pairwise terms, run over unique atom pairs
+        for (int iAtom = 0; iAtom<nAtoms; iAtom++)
+        {
+            for (int jAtom = 0; jAtom < iAtom; jAtom++)
+            {
+                if (topo[iAtom, jAtom])
+                {
+                    BondTerm newBond = new BondTerm();
+                    newBond.Atom1 = jAtom;
+                    newBond.Atom2 = iAtom;
+                    if (atomType[iAtom] == "C" && atomType[jAtom] == "C")
+                    {
+                        newBond.kBond = kbCC;
+                        newBond.Req = reqCC;
+                    }
+                    else if (atomType[iAtom] == "C" && atomType[jAtom] == "H" ||
+                             atomType[iAtom] == "H" && atomType[jAtom] == "C")
+                    {
+                        newBond.kBond = kbCH;
+                        newBond.Req = reqCH;
+                    }
+                    else if (atomType[iAtom] == "H" && atomType[jAtom] == "H")
+                    {
+                        newBond.kBond = kb;
+                        newBond.Req = reqHH;
+                    }
+                    else // take defaults for the time being
+                    {
+                        newBond.kBond = kb;
+                        newBond.Req = reqStd;
+                    }
+                    bondList.Add(newBond);
+                }
+                // else ... set here non-bonded interactions
+            }
+
+        }
+        if (LogLevel >= 1000)
+        {
+            FFlog.WriteLine("Bond terms:");
+            FFlog.WriteLine(" Atom1  Atom2      kBond           Req");
+            foreach (BondTerm bond in bondList)
+            {
+                FFlog.WriteLine(string.Format(" {0,4} - {1,4}   {2,12:f3}  {3,12:f3}",
+                    bond.Atom1,bond.Atom2,bond.kBond,bond.Req));
+            }
+        }
+
+        // angle terms
+        // run over unique bond pairs
+        foreach (BondTerm bond1 in bondList)
+        {
+            foreach(BondTerm bond2 in bondList)
+            {
+                // if we reached the same atom pair, we can skip
+                if (bond1.Atom1 == bond2.Atom1 && bond1.Atom2 == bond2.Atom2) break;
+
+                int idx=-1, jdx=-1, kdx=-1;
+                if (bond1.Atom1 == bond2.Atom1)
+                {
+                    idx = bond1.Atom2; jdx = bond1.Atom1; kdx = bond2.Atom2;
+                }
+                else if (bond1.Atom1 == bond2.Atom2)
+                {
+                    idx = bond1.Atom2; jdx = bond1.Atom1; kdx = bond2.Atom1;
+                }
+                else if (bond1.Atom2 == bond2.Atom1)
+                {
+                    idx = bond1.Atom1; jdx = bond1.Atom2; kdx = bond2.Atom2;
+                }
+                else if (bond1.Atom2 == bond2.Atom2)
+                {
+                    idx = bond1.Atom1; jdx = bond1.Atom2; kdx = bond2.Atom1;
+                }
+                if (idx>-1) // if anything was found: set term
+                {
+                    AngleTerm newAngle = new AngleTerm();
+                    newAngle.Atom1 = kdx;  // I put kdx->Atom1 and idx->Atom3 just for aesthetical reasons ;)
+                    newAngle.Atom2 = jdx;
+                    newAngle.Atom3 = idx;
+                    // currently only this angle type:
+                    newAngle.kAngle = ka;
+                    newAngle.Aeq = alphaNull;
+                    angleList.Add(newAngle);
                 }
             }
         }
+        if (LogLevel >= 1000)
+        {
+            FFlog.WriteLine("Angle terms:");
+            FFlog.WriteLine(" Atom1  Atom2  Atom3    kAngle           Aeq");
+            foreach (AngleTerm angle in angleList)
+            {
+                FFlog.WriteLine(string.Format(" {0,4} - {1,4} - {2,4}  {3,12:f3}  {4,12:f3}",
+                    angle.Atom1, angle.Atom2, angle.Atom3, angle.kAngle, angle.Aeq));
+            }
+        }
+
+
+
     }
 
-    //for all connections in the corresponding lists, the forces are calculated.
-    // at the end, the method to update the positions of the atoms is called
-    void forces()
+    // evaluate the ForceField and compute update of positions
+    // to enhance stability, do more than one timestep for each actual update
+    // in applyMovements, finally the actual objects are updated
+    void applyFF()
     {
-        //Loop Bond List
-        foreach(Vector2 bond in bondList)
+        int nTimeSteps = 4;
+        for (int istep = 0; istep < nTimeSteps; istep++)
         {
-            calcBondForces(bond);
+            //Loop Bond List
+            foreach (BondTerm bond in bondList)
+            {
+                calcBondForces(bond);
+            }
+
+            //Loop Angle List
+            foreach (AngleTerm angle in angleList)
+            {
+                calcAngleForces(angle);
+            }
+
+            calcMovements();
         }
-
-        //Loop Angle List
-        foreach(Vector3 angle in angleList)
-        {
-            calcAngleForces(angle);
-        }
-
-        calcMovements();
-
         applyMovements();
     }
 
-    // COMMENT3: instead of fetching the atom coordinates here, the info on list 'positions' could be used
     // calculate bond forces
-    void calcBondForces(Vector2 bond)
+    void calcBondForces(BondTerm bond)
     {
-        if (LogLevel >= 1000) FFlog.WriteLine("calcBondForces for {0} - {1}", (int)bond.x, (int)bond.y);
+        if (LogLevel >= 1000) FFlog.WriteLine("calcBondForces for {0} - {1}", (int)bond.Atom1, (int)bond.Atom2);
         //bond vector
-        Vector3 rb = position[(int)bond.x] - position[(int)bond.y];
+        Vector3 rb = position[bond.Atom1] - position[bond.Atom2];
         //force on this bond vector
-        float delta = rb.magnitude - standardDistance;
-        //float fb = -kb * (Vector3.Magnitude(rb) - standardDistance);
-        float fb = -kb * delta;
-        if (LogLevel >= 1000) FFlog.WriteLine("dist: {0,12:f3}  dist0: {1,12:f3}  --  force = {2,14:f5} ",rb.magnitude,standardDistance,fb);
+        float delta = rb.magnitude - bond.Req;
+        float fb = -bond.kBond * delta;
+        if (LogLevel >= 1000) FFlog.WriteLine("dist: {0,12:f3}  dist0: {1,12:f3}  --  force = {2,14:f5} ",rb.magnitude,bond.Req,fb);
         //separate the forces on the two atoms
-        Vector3 fc1 =  fb * (rb / Vector3.Magnitude(rb));
+        Vector3 fc1 =  fb * (rb / Vector3.Magnitude(rb)); // could use rb.normalized
         Vector3 fc2 = -fb * (rb / Vector3.Magnitude(rb));
 
         if (LogLevel >= 10000)
         {
-            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)bond.x, fc1.x, fc1.y, fc1.z));
-            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)bond.y, fc2.x, fc2.y, fc2.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", bond.Atom1, fc1.x, fc1.y, fc1.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", bond.Atom2, fc2.x, fc2.y, fc2.z));
         }
 
-        movement[(int)bond.x] += fc1;
-        movement[(int)bond.y] += fc2;
+        forces[bond.Atom1] += fc1;
+        forces[bond.Atom2] += fc2;
 
         if (LogLevel >= 10000)
         {
@@ -233,39 +346,38 @@ public class ForceField : MonoBehaviour
             {
                 FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}",
                     iAtom, atomList[iAtom],
-                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z));
+                    forces[iAtom].x, forces[iAtom].y, forces[iAtom].z));
             }
         }
     }
 
     // calculate angle forces
-    void calcAngleForces(Vector3 angle)
+    void calcAngleForces(AngleTerm angle)
     {
-        if (LogLevel >= 1000) FFlog.WriteLine("calcAngleForces for {0} - {1} - {2}", (int)angle.x, (int)angle.y, (int)angle.z);
-        Vector3 rb1 = position[(int)angle.x] - position[(int)angle.y];
-        Vector3 rb2 = position[(int)angle.z] - position[(int)angle.y];
+        if (LogLevel >= 1000) FFlog.WriteLine("calcAngleForces for {0} - {1} - {2}", angle.Atom1, angle.Atom2, angle.Atom3);
+        Vector3 rb1 = position[angle.Atom1] - position[angle.Atom2];
+        Vector3 rb2 = position[angle.Atom3] - position[angle.Atom2];
 
         float cosAlpha = (Vector3.Dot(rb1, rb2)) / (Vector3.Magnitude(rb1) * Vector3.Magnitude(rb2));
         //float angleAlpha = Mathf.Acos(cosAlpha) * (180 / Mathf.PI);
-        float mAlpha = ka * (Mathf.Acos(cosAlpha) * (180.0f / Mathf.PI) - alphaNull);
+        float mAlpha = angle.kAngle * (Mathf.Acos(cosAlpha) * (180.0f / Mathf.PI) - angle.Aeq);
 
-        // check: rb1 and rb2 were mixed up in vector part
         Vector3 fI = (mAlpha / (Vector3.Magnitude(rb1) * Mathf.Sqrt(1.0f - cosAlpha * cosAlpha))) * ((rb2 / Vector3.Magnitude(rb2)) - cosAlpha * (rb1 / Vector3.Magnitude(rb1)));
         Vector3 fK = (mAlpha / (Vector3.Magnitude(rb2) * Mathf.Sqrt(1.0f - cosAlpha * cosAlpha))) * ((rb1 / Vector3.Magnitude(rb1)) - cosAlpha * (rb2 / Vector3.Magnitude(rb2)));
         Vector3 fJ = -fI - fK;
 
-        if (LogLevel >= 1000) FFlog.WriteLine("angle: {0,12:f3}  angle0: {1,12:f3}  --  moment = {2,14:f5} ", Mathf.Acos(cosAlpha) * (180.0f / Mathf.PI), alphaNull, mAlpha);
+        if (LogLevel >= 1000) FFlog.WriteLine("angle: {0,12:f3}  angle0: {1,12:f3}  --  moment = {2,14:f5} ", Mathf.Acos(cosAlpha) * (180.0f / Mathf.PI), angle.Aeq, mAlpha);
 
         if (LogLevel >= 10000)
         {
-            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)angle.x, fI.x, fI.y, fI.z));
-            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)angle.y, fJ.x, fJ.y, fJ.z));
-            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", (int)angle.z, fK.x, fK.y, fK.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", angle.Atom1, fI.x, fI.y, fI.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", angle.Atom2, fJ.x, fJ.y, fJ.z));
+            FFlog.WriteLine(string.Format("force for atom {0,3}:  ( {1,14:f6} ; {2,14:f6} ; {3,14:f6} )", angle.Atom3, fK.x, fK.y, fK.z));
         }
 
-        movement[(int)angle.x] += fI;
-        movement[(int)angle.y] += fJ; //  fJ and fK were interchanged ....
-        movement[(int)angle.z] += fK;
+        forces[angle.Atom1] += fI;
+        forces[angle.Atom2] += fJ; 
+        forces[angle.Atom3] += fK;
 
         if (LogLevel >= 10000)
         {
@@ -274,7 +386,7 @@ public class ForceField : MonoBehaviour
             {
                 FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}",
                     iAtom, atomList[iAtom],
-                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z));
+                    forces[iAtom].x, forces[iAtom].y, forces[iAtom].z));
             }
         }
 
@@ -291,55 +403,33 @@ public class ForceField : MonoBehaviour
             {
                 FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}    m = {5,9:f3} ",
                     iAtom, atomList[iAtom],
-                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z, atomMass[iAtom]));
+                    forces[iAtom].x, forces[iAtom].y, forces[iAtom].z, atomMass[iAtom]));
             }
         }
-
-        Vector3 CurCOM = new Vector3(0, 0, 0); // current center of mass
-        
-        foreach(var coord in position)
-        {
-            CurCOM += coord;  // times (relative) mass of the atom (to be implemented)
-        }
-        CurCOM = CurCOM / (float)nAtoms;
 
 
         // force -> momentum change: divide by mass
         // momentum change to position change: apply time factor
-        float timeFactor = 2f;
         for (int iAtom = 0; iAtom < nAtoms; iAtom++)
         {
             // negative masses flag a fixed atom
             if (atomMass[iAtom] > 0.0f)
             {
-                movement[iAtom] *= timeFactor/atomMass[iAtom];
+                forces[iAtom] *= timeFactor/atomMass[iAtom];
             }
             else
             {
-                movement[iAtom] = new Vector3(0.0f, 0.0f, 0.0f);
+                forces[iAtom] = new Vector3(0.0f, 0.0f, 0.0f);
             }
         }
 
-        // check angular momentum ... if required
-        //Vector3 AngMom = new Vector3(0, 0, 0);
-        //for (int iAtom = 0; iAtom < nAtoms; iAtom++)
-        //{
-        //    Vector3 vel = movement[iAtom];
-        //    Vector3 pos = position[iAtom] - CurCOM; // maybe this can be done more cleanly
-        //    AngMom.x += pos.y * vel.z; // times (relative) mass
-        //    AngMom.y += pos.z * vel.x;
-        //    AngMom.z += pos.x * vel.y;
-        //}
-        //
-		// so far, we have computed the angular momentum of the structure, need now code to apply a damping of the rotation
-		// AK will take care of that
 
         // check for too long steps:
         float MaxMove = 10f;
         float moveMaxNorm = 0f; // norm of movement vector
         for (int iAtom = 0; iAtom < nAtoms; iAtom++)
         {
-            float moveNorm = Vector3.Magnitude(movement[iAtom]);
+            float moveNorm = Vector3.Magnitude(forces[iAtom]);
             moveMaxNorm = Mathf.Max(moveMaxNorm, moveNorm);
         }
         if (moveMaxNorm > MaxMove)
@@ -349,7 +439,7 @@ public class ForceField : MonoBehaviour
             
             for (int iAtom = 0; iAtom < nAtoms; iAtom++)
             {
-                movement[iAtom] *= scaleMove;
+                forces[iAtom] *= scaleMove;
             }
         }
 
@@ -360,10 +450,16 @@ public class ForceField : MonoBehaviour
             {
                 FFlog.WriteLine(string.Format(" {0,4:d}  -  {1,5:d}   {2,14:f6} {3,14:f6}  {4,14:f6}",
                     iAtom, atomList[iAtom],
-                    movement[iAtom].x, movement[iAtom].y, movement[iAtom].z));
+                    forces[iAtom].x, forces[iAtom].y, forces[iAtom].z));
             }
         }
 
+        // update position and total movement:
+        for (int iAtom = 0; iAtom < nAtoms; iAtom++)
+        {
+            movement[iAtom] += forces[iAtom];
+            position[iAtom] += forces[iAtom];
+        }
 
     }
 

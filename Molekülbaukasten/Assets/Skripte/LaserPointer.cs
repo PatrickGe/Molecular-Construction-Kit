@@ -88,7 +88,12 @@ namespace Valve.VR.Extras
             Vector2 touchPos = trackpadtouch.GetAxis(SteamVR_Input_Sources.Any);
             if (touchPos.y >= 0.5)
             {
-                this.transform.GetChild(1).GetChild(0).gameObject.SetActive(true);
+                var device = trackpadtouch.GetActiveDevice(SteamVR_Input_Sources.Any);
+                if(device == transform.GetComponent<SteamVR_Behaviour_Pose>().inputSource)
+                {
+                    transform.GetChild(1).GetChild(0).gameObject.SetActive(true);
+                }                 
+                
             } else
             {
                 this.transform.GetChild(1).GetChild(0).gameObject.SetActive(false);

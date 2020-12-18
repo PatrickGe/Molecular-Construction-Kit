@@ -205,7 +205,6 @@ GameObject:
   - component: {fileID: 8531711032114630990}
   - component: {fileID: 1978045557688128306}
   - component: {fileID: 1063993745562493432}
-  - component: {fileID: 1007098195870191215}
   m_Layer: 0
   m_Name: Kohlenstoff
   m_TagString: Atom
@@ -401,30 +400,6 @@ MonoBehaviour:
   c1c2: 0
   c1c3: 0
   c2c3: 0
---- !u!114 &1007098195870191215
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8531711032114631031}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c3a73a48a8100cc43b4dd23240eb515b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  allGameObjects: []
-  list_curAtoms: []
-  KohlenstoffPrefab: {fileID: 8531711032114631031}
-  VerbindungCC: {fileID: 9133145376059441668, guid: 7d05a8fe37e4da44ea16a2866fc9f0d3,
-    type: 3}
-  changingText: {fileID: 0}
-  childSelected: {fileID: 0}
-  childGrabbedSelected: {fileID: 0}
-  scale: 0
-  winkelDiff: 0
-  allAtom: 1
-  forceField: 0
 --- !u!1 &8795669253747649983
 GameObject:
   m_ObjectHideFlags: 0

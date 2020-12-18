@@ -62,7 +62,7 @@ public class GlobalCtrl : MonoBehaviour
     public float scale;
     public float winkelDiff;
     public bool allAtom = true;
-    public bool forceField = false;
+    public bool forceField = true;
 
     public Dictionary<int, Vector3> atomMap = new Dictionary<int, Vector3>();
 
@@ -73,7 +73,7 @@ public class GlobalCtrl : MonoBehaviour
         //THIS IS THE GLOBAL SCALE FACTOR IN METER TO SCALE THE MOLECULE. Do not change during runtime!
         //The scale describes exactly the length of a single bond. Atoms are half of the scale size.
         //Example: scale of 0.2f renders an atom with a diameter of 10cm and the bonds in the molecule will have a length of 20cm
-        scale = 0.2f;
+        scale = 0.1f;  // 0.05f to 0.1f is what a practical user will find satisfying
 
 
         allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
@@ -144,6 +144,7 @@ public class GlobalCtrl : MonoBehaviour
         GameObject wasserstoffatom = Instantiate(KohlenstoffPrefab, new Vector3(0, 1, 0.5f), Quaternion.identity);
         wasserstoffatom.GetComponent<Atom>().f_InitHydrogen(_id);
         wasserstoffatom.transform.position = pos + new Vector3(0, 0, 0.2f);
+        wasserstoffatom.transform.localScale = new Vector3(scale * 0.3f, scale * 0.3f, scale * 0.3f);
         list_curAtoms.Add(wasserstoffatom.GetComponent<Atom>());
     }
 

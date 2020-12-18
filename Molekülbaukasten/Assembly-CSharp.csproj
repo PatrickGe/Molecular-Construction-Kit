@@ -271,6 +271,7 @@
     <None Include="Assets\Skripte\ForceFieldOld.cs.deact.txt" />
     <None Include="Assets\MoleculeFiles\D2.xml" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
+    <None Include="Assets\MoleculeFiles\MOLEC1.xml" />
     <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\MoleculeFiles\RING.xml" />
