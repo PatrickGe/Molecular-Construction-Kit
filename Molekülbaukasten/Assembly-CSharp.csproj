@@ -250,12 +250,14 @@
     <Compile Include="Assets\Skripte\Auswahlgeste.cs" />
     <Compile Include="Assets\Skripte\CFileHelper.cs" />
     <Compile Include="Assets\Skripte\ConnectionStatus.cs" />
+    <Compile Include="Assets\Skripte\ControllerInteractions.cs" />
     <Compile Include="Assets\Skripte\EditMode.cs" />
     <Compile Include="Assets\Skripte\ForceField.cs" />
     <Compile Include="Assets\Skripte\GestenErkennung.cs" />
     <Compile Include="Assets\Skripte\GlobalCtrl.cs" />
     <Compile Include="Assets\Skripte\GrabController.cs" />
     <Compile Include="Assets\Skripte\LaserPointer.cs" />
+    <Compile Include="Assets\Skripte\Logger1.cs" />
     <Compile Include="Assets\Skripte\VerknüpfungAtome.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />

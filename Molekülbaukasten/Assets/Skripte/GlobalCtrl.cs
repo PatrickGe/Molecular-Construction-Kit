@@ -65,6 +65,10 @@ public class GlobalCtrl : MonoBehaviour
     public float winkelDiff;
     public bool allAtom = true;
     public bool forceField = true;
+    public bool collision;
+    public Atom collider1;
+    public Atom collider2;
+
 
     public Dictionary<int, Vector3> atomMap = new Dictionary<int, Vector3>();
 
@@ -76,7 +80,6 @@ public class GlobalCtrl : MonoBehaviour
         //The scale describes exactly the length of a single bond. Atoms are half of the scale size.
         //Example: scale of 0.2f renders an atom with a diameter of 10cm and the bonds in the molecule will have a length of 20cm
         scale = 0.1f;  // 0.05f to 0.1f is what a practical user will find satisfying
-
         allGameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject));
         foreach (GameObject obj in allGameObjects)
         {
@@ -152,21 +155,22 @@ public class GlobalCtrl : MonoBehaviour
         }
         dummyatom.transform.localScale = new Vector3(scale * 0.1f, scale * 0.1f, scale * 0.1f);
         list_curAtoms.Add(dummyatom.GetComponent<Atom>());
-
-        //print("finished dummy");
-
+        dummyatom.transform.parent = mainAtom.transform.parent;
+        mainAtom.getConPoint(conID).otherAtomID = dummyatom.GetComponent<Atom>()._id;
+        mainAtom.getConPoint(conID).otherPointID = 0;
+        mainAtom.getConPoint(conID).isConnected = true;
         createDummyCon(mainAtom, dummyatom.GetComponent<Atom>());
     }
 
     public void createDummyCon(Atom mainAtom, Atom dummyAtom)
     {
-        _conID += 1;
+        //_conID += 1;
         GameObject connection = Instantiate(dummycon, mainAtom.transform.position, Quaternion.identity);
         connection.transform.LookAt(dummyAtom.transform.position);
         connection.transform.parent = mainAtom.transform.parent;
-        connection.transform.name = "dummycon" + _conID;
+        connection.transform.name = "dummycon" + dummyAtom._id;
         float distance = Vector3.Distance(mainAtom.transform.localPosition, dummyAtom.transform.localPosition);
-        connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, distance / 2);
+        connection.transform.localScale = new Vector3(scale * 0.5f, scale * 0.5f, distance / 2);
         //print("finished con");
     }
 
@@ -184,11 +188,11 @@ public class GlobalCtrl : MonoBehaviour
 
         carbonatom.transform.parent = molecule.transform;
         list_curAtoms.Add(carbonatom.GetComponent<Atom>());
+        int i = 0;
         foreach(ConnectionStatus conPoint in carbonatom.GetComponent<Atom>().getAllConPoints())
         {
-            print(conPoint.conID);
-            print(carbonatom.GetComponent<Atom>().getAllConPoints().Count);
-            createDummy(carbonatom.GetComponent<Atom>(), conPoint.conID);
+            createDummy(carbonatom.GetComponent<Atom>(), i);
+            i++;
         }
     }
     public void createHydrogen(Vector3 pos)
@@ -207,69 +211,79 @@ public class GlobalCtrl : MonoBehaviour
         list_curAtoms.Add(hydrogen.GetComponent<Atom>());
     }
 
-    public void createConnection(List<Atom> senden)
+    public void createConnection(List<int> conList)
     {
         _conID += 1;
-        senden[0].transform.parent = GameObject.Find("Molekül").transform;
-        senden[1].transform.parent = GameObject.Find("Molekül").transform;
-        //set position here
-        foreach (ConnectionStatus childofGrabbedLoop in senden[1].getAllConPoints())
+        Atom conAtom0 = getAtomByID(conList[0]);
+        Atom conAtom1 = getAtomByID(conList[1]);
+        int otherPoint0 = conList[2];
+        int otherPoint1 = conList[3];
+        //Transform parents
+        Transform oldParent = conAtom1.transform.parent;
+        while (oldParent.childCount > 0)
         {
-            if (childofGrabbedLoop.isConnected == false)
-            {
-                foreach (ConnectionStatus childLoop in senden[0].getAllConPoints())
-                {
-                    if (childLoop.isConnected == false)
-                    {
-                        if (childGrabbedSelected == null || childSelected == null)
-                        {
-                            childGrabbedSelected = childofGrabbedLoop;
-                            childSelected = childLoop;
-                        }
-                        if (Vector3.Distance(childLoop.transform.position, childofGrabbedLoop.transform.position) <= Vector3.Distance(childGrabbedSelected.transform.position, childSelected.transform.position))
-                        {
-                            childGrabbedSelected = childofGrabbedLoop;
-                            childSelected = childLoop;
-                        }
-                    }
-                }
-            }
+            oldParent.GetChild(0).transform.SetParent(conAtom0.transform.parent);
         }
-        //newly addes atom gets rotated to vector, it's child object is shown as connected
-        childGrabbedSelected.isConnected = true;
-        childSelected.isConnected = true;
+        Destroy(oldParent.transform.gameObject);
 
-        // positioning of the linked atoms
-        Vector3 offset = Vector3.Normalize(Quaternion.Euler(senden[0].transform.rotation.eulerAngles) * (childSelected.transform.localPosition / childSelected.transform.parent.localScale.x));
-        senden[1].transform.position = senden[0].transform.position + offset * scale;
-        Vector3 direction = childSelected.transform.position - senden[1].transform.position;
-        Quaternion rotation = Quaternion.FromToRotation(childGrabbedSelected.transform.localPosition, direction);
-        senden[1].transform.rotation = rotation;
+        ////set position here
+        //foreach (ConnectionStatus childofGrabbedLoop in conAtom1.getAllConPoints())
+        //{
+        //    if (childofGrabbedLoop.isConnected == false)
+        //    {
+        //        foreach (ConnectionStatus childLoop in conAtom0.getAllConPoints())
+        //        {
+        //            if (childLoop.isConnected == false)
+        //            {
+        //                if (childGrabbedSelected == null || childSelected == null)
+        //                {
+        //                    childGrabbedSelected = childofGrabbedLoop;
+        //                    childSelected = childLoop;
+        //                }
+        //                if (Vector3.Distance(childLoop.transform.position, childofGrabbedLoop.transform.position) <= Vector3.Distance(childGrabbedSelected.transform.position, childSelected.transform.position))
+        //                {
+        //                    childGrabbedSelected = childofGrabbedLoop;
+        //                    childSelected = childLoop;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+        ////newly addes atom gets rotated to vector, it's child object is shown as connected
+        //childGrabbedSelected.isConnected = true;
+        //childSelected.isConnected = true;
+
+        //// positioning of the linked atoms
+        //Vector3 offset = Vector3.Normalize(Quaternion.Euler(conAtom0.transform.rotation.eulerAngles) * (childSelected.transform.localPosition / childSelected.transform.parent.localScale.x));
+        //conAtom1.transform.position = conAtom0.transform.position + offset * scale;
+        //Vector3 direction = childSelected.transform.position - conAtom1.transform.position;
+        //Quaternion rotation = Quaternion.FromToRotation(childGrabbedSelected.transform.localPosition, direction);
+        //conAtom1.transform.rotation = rotation;
 
         //create the visual connection between them
-        childGrabbedSelected.gameObject.GetComponent<Renderer>().material.color = Color.clear;
-        childSelected.gameObject.GetComponent<Renderer>().material.color = Color.clear;
-        GameObject connection = Instantiate(atomcon, senden[0].transform.position, Quaternion.identity);
-        connection.transform.LookAt(senden[1].transform.position);
-        connection.transform.parent = GameObject.Find("Molekül").transform;
+        //childGrabbedSelected.gameObject.GetComponent<Renderer>().material.color = Color.clear;
+        //childSelected.gameObject.GetComponent<Renderer>().material.color = Color.clear;
+        GameObject connection = Instantiate(atomcon, conAtom0.transform.position, Quaternion.identity);
+        connection.transform.LookAt(conAtom1.transform.position);
+        connection.transform.parent = conAtom0.transform.parent;
         connection.transform.name = "con" + _conID;
-        float distance = Vector3.Distance(senden[1].transform.localPosition, senden[0].transform.localPosition);
-
-
+        float distance = Vector3.Distance(conAtom1.transform.localPosition, conAtom0.transform.localPosition);
 
         connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, distance/2);
-        
-        //additional information is set, so each atom knows the id of it's connected atoms
-        childSelected.otherAtomID = senden[1].GetComponent<Atom>()._id;
-        childGrabbedSelected.otherAtomID = senden[0].GetComponent<Atom>()._id;
-        childSelected.conID = _conID;
-        childGrabbedSelected.conID = _conID;
-        int.TryParse(childGrabbedSelected.name, out childSelected.otherPointID);
-        int.TryParse(childSelected.name, out childGrabbedSelected.otherPointID);
 
-        //reset used variables
-        childGrabbedSelected = null;
-        childSelected = null;
+        //additional information is set, so each atom knows the id of it's connected atoms
+        conAtom0.getConPoint(otherPoint0).otherAtomID = conAtom1._id;
+        conAtom1.getConPoint(otherPoint1).otherAtomID = conAtom0._id;
+        conAtom0.getConPoint(otherPoint0).conID = _conID;
+        conAtom1.getConPoint(otherPoint1).conID = _conID;
+
+
+        //int.TryParse(childGrabbedSelected.name, out childSelected.otherPointID);
+        //int.TryParse(childSelected.name, out childGrabbedSelected.otherPointID);
+
+        ////reset used variables
+        //childGrabbedSelected = null;
+        //childSelected = null;
     }
 
     public List<atomData> saveMolecule()
@@ -500,5 +514,18 @@ public class GlobalCtrl : MonoBehaviour
             list_curAtoms.Remove(fixedAtom);
             atomMap.Remove(fixedAtom._id);
         }
+    }
+
+
+    // returns the atom with the given ID 
+    public Atom getAtomByID(float id)
+    {
+        foreach (Atom c1 in list_curAtoms)
+        {
+            if (c1._id == (int)id)
+                return c1;
+        }
+
+        return null;
     }
 }

@@ -7,11 +7,11 @@ using UnityEngine;
 
 public class ForceField : MonoBehaviour
 {
-    struct BondTerm
+    public struct BondTerm
     {
         public int Atom1; public int Atom2; public float kBond; public float Req;
     }
-    List<BondTerm> bondList = new List<BondTerm>();
+    public List<BondTerm> bondList = new List<BondTerm>();
 
     struct AngleTerm
     {
@@ -44,6 +44,9 @@ public class ForceField : MonoBehaviour
     const float reqCC = 154f;
     const float reqCH = 108f;
     const float reqHH = 78f;
+
+    const float kbCX = 10.0f;
+    const float reqCX = 80f;
     // constants for angle terms
     float ka = 360.0f; // standard value (must be this large ... or even larger!)
     //float standardDistance = 154f; // integrate into new bondList
@@ -206,6 +209,13 @@ public class ForceField : MonoBehaviour
                     }
                     else if (atomType[iAtom] == "C" && atomType[jAtom] == "H" ||
                              atomType[iAtom] == "H" && atomType[jAtom] == "C")
+                    {
+                        newBond.kBond = kbCH;
+                        newBond.Req = reqCH;
+                    }
+                    // RENEW THIS LATER
+                    else if (atomType[iAtom] == "C" && atomType[jAtom] == "DUMMY" ||
+                             atomType[iAtom] == "DUMMY" && atomType[jAtom] == "C")
                     {
                         newBond.kBond = kbCH;
                         newBond.Req = reqCH;
@@ -486,10 +496,23 @@ public class ForceField : MonoBehaviour
                 {
                     Atom carbonConnected = getAtomByID(carbonCP.otherAtomID);
                     float distance = Vector3.Distance(atom.transform.position, carbonConnected.transform.position);
-                    Transform connection = GameObject.Find("con" + carbonCP.conID).transform;
-                    connection.localScale = new Vector3(connection.localScale.x, connection.localScale.y, distance/2);
-                    connection.transform.position = atom.transform.position;
-                    connection.transform.LookAt(carbonConnected.transform.position);
+                    print(carbonConnected.type);
+                    if(carbonConnected.type == "DUMMY")
+                    {
+                        //Fehler hier
+                        print(carbonCP.conID);
+                        Transform connection = GameObject.Find("dummycon" + carbonCP.conID).transform;
+                        connection.localScale = new Vector3(connection.localScale.x, connection.localScale.y, distance / 2);
+                        connection.transform.position = atom.transform.position;
+                        connection.transform.LookAt(carbonConnected.transform.position);
+                    } else
+                    {
+                        Transform connection = GameObject.Find("con" + carbonCP.conID).transform;
+                        connection.localScale = new Vector3(connection.localScale.x, connection.localScale.y, distance / 2);
+                        connection.transform.position = atom.transform.position;
+                        connection.transform.LookAt(carbonConnected.transform.position);
+                    }
+
 
                 }
             }

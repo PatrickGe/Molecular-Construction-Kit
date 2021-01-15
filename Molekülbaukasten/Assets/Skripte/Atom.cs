@@ -38,7 +38,7 @@ public class Atom : MonoBehaviour
         _id = id;
         this.type = "DUMMY";
         this.name = "dummy" + _id;
-        this.mass = 0;
+        this.mass = 1;
         //ConnectionStatus conDummy = new ConnectionStatus();
         //conDummy.otherAtomID = atomid;
         //conDummy.otherPointID = conID;
@@ -52,7 +52,6 @@ public class Atom : MonoBehaviour
         this.c1.usable = false;
         this.c2.usable = false;
         this.c3.usable = false;
-        print("init Dummy");
     }
 
 
@@ -160,6 +159,27 @@ public class Atom : MonoBehaviour
         
     }
 
+    private void OnTriggerEnter(Collider collider)
+    {
+        if(collider.name.StartsWith("dummy") && this.name.StartsWith("dummy") && GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision == false)
+        {
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision = true;
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1 = collider.GetComponent<Atom>();
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2 = this.GetComponent<Atom>();
+        }
+    }
+
+    private void OnTriggerExit(Collider collider)
+    {
+        if (collider.name.StartsWith("dummy") && this.name.StartsWith("dummy"))
+        {
+            print("hier");
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision = false;
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1 = null;
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2 = null;
+        }
+
+    }
 
 
     // Update is called once per frame
@@ -176,30 +196,5 @@ public class Atom : MonoBehaviour
             isFull = fullTest;
         }
 
-
-        //allAtoms = GameObject.Find("Camera").GetComponent<GlobalCtrl>().list_curAtoms;
-        
-        //if (this.c0.isConnected && this.c1.isConnected)
-        //    c0c1 = Vector3.Angle(allAtoms.Find(p => p._id == c0.otherAtomID).transform.localPosition - this.transform.localPosition, allAtoms.Find(p => p._id == c1.otherAtomID).transform.localPosition - this.transform.localPosition);
-
-        //if(this.c0.isConnected && this.c2.isConnected)
-        //    c0c2 = Vector3.Angle(allAtoms.Find(p => p._id == c0.otherAtomID).transform.localPosition - this.transform.localPosition, allAtoms.Find(p => p._id == c2.otherAtomID).transform.localPosition - this.transform.localPosition);
-
-        //if (this.c0.isConnected && this.c3.isConnected)
-        //    c0c3 = Vector3.Angle(allAtoms.Find(p => p._id == c0.otherAtomID).transform.localPosition - this.transform.localPosition, allAtoms.Find(p => p._id == c3.otherAtomID).transform.localPosition - this.transform.localPosition);
-
-        //if (this.c1.isConnected && this.c2.isConnected)
-        //    c1c2 = Vector3.Angle(allAtoms.Find(p => p._id == c1.otherAtomID).transform.localPosition - this.transform.localPosition, allAtoms.Find(p => p._id == c2.otherAtomID).transform.localPosition - this.transform.localPosition);
-
-        //if (this.c1.isConnected && this.c3.isConnected)
-        //    c1c3 = Vector3.Angle(allAtoms.Find(p => p._id == c1.otherAtomID).transform.localPosition - this.transform.localPosition, allAtoms.Find(p => p._id == c3.otherAtomID).transform.localPosition - this.transform.localPosition);
-
-        //if (this.c2.isConnected && this.c3.isConnected)
-        //    c2c3 = Vector3.Angle(allAtoms.Find(p => p._id == c2.otherAtomID).transform.localPosition - this.transform.localPosition, allAtoms.Find(p => p._id == c3.otherAtomID).transform.localPosition - this.transform.localPosition);
-
-        //if (GameObject.Find("Molekül").GetComponent<EditMode>().editMode)
-        //{
-        //    print(this + "  " + c0c1 + "  " + c0c2 + "  " + c0c3 + "  " + c1c2 + "  " + c1c3 + "  " + c2c3);
-        //}
     }
 }
