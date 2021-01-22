@@ -26,22 +26,12 @@ public class GrabController : MonoBehaviour
     {
 
         m_pose = GetComponent<SteamVR_Behaviour_Pose>();
-        if(this.name == "Controller (left)")
-        {
-            logger = new Logger1(@"C:\Users\vruser\Documents\Molecular-Construction-Kit\MyLog.log");
-            //Log = File.CreateText("totalLog.txt");
-            logger.WriteLine("Start");
-        }
-
-    }
-
-    void OnApplicationQuit()
-    {
-        if(this.name == "Controller (left)")
-        {
-            //Log.Close();
-        }
-        
+        //if(this.name == "Controller (left)")
+        //{
+        //    logger = new Logger1(@"C:\Users\vruser\Documents\Molecular-Construction-Kit\MyLog.log");
+        //    //Log = File.CreateText("totalLog.txt");
+        //    logger.WriteLine("Start");
+        //}
 
     }
 
@@ -56,12 +46,7 @@ public class GrabController : MonoBehaviour
         //Trigger Up
 
         if (triggerklicked.GetStateUp(m_pose.inputSource))
-        {
-            if(this.name == "Controller (left)")
-            {
-                logger.WriteLine("Trigger Up, bevor Drop");
-            }
-            
+        {            
             Drop();
             isPressed = false;
         }
@@ -93,8 +78,6 @@ public class GrabController : MonoBehaviour
 
             }
         }
-        //Needed to connect 2 Atoms
-        //checkConnection();
     }
 
 
@@ -151,10 +134,6 @@ public class GrabController : MonoBehaviour
 
     public void Drop()
     {
-        if (this.name == "Controller (left)")
-        {
-            logger.WriteLine("In Drop");
-        }
         // Null check
         if (!m_currentAtom)
             return;
@@ -162,10 +141,6 @@ public class GrabController : MonoBehaviour
 
         if (transform.GetComponentInParent<GlobalCtrl>().collision)
         {
-            if (this.name == "Controller (left)")
-            {
-                logger.WriteLine("In Collision");
-            }
             List<int> conList = new List<int>();
             conList.Add(GetComponentInParent<GlobalCtrl>().collider1.c0.otherAtomID);
             conList.Add(GetComponentInParent<GlobalCtrl>().collider2.c0.otherAtomID);
@@ -180,46 +155,14 @@ public class GrabController : MonoBehaviour
 
             Destroy(GetComponentInParent<GlobalCtrl>().collider1.gameObject);
             Destroy(GetComponentInParent<GlobalCtrl>().collider2.gameObject);
-
-
-            //GetComponentInParent<GlobalCtrl>().collider1.gameObject.SetActive(false);
-            //GetComponentInParent<GlobalCtrl>().collider2.gameObject.SetActive(false);
             Destroy(GameObject.Find("dummycon" + GetComponentInParent<GlobalCtrl>().collider1._id));
             Destroy(GameObject.Find("dummycon" + GetComponentInParent<GlobalCtrl>().collider2._id));
 
             GetComponentInParent<GlobalCtrl>().collision = false;
             GetComponentInParent<GlobalCtrl>().collider1 = null;
             GetComponentInParent<GlobalCtrl>().collider2 = null;
-            //GameObject.Find("dummycon" + GetComponentInParent<GlobalCtrl>().collider1._id).SetActive(false);
-            //GameObject.Find("dummycon" + GetComponentInParent<GlobalCtrl>().collider2._id).SetActive(false);
             conList.Clear();
         }
-
-
-
-        //// Create connection
-        //if (connectAtom != null)
-        //{
-        //    //If min. distance is reached
-        //    if (Vector3.Distance(connectAtom.transform.position, m_currentAtom.transform.position) <= GetComponentInParent<GlobalCtrl>().scale * 0.9f)
-        //    {
-        //        //Atoms are added to list
-        //        List<Atom> senden = new List<Atom>();
-        //        senden.Add(connectAtom);
-        //        senden.Add(m_currentAtom);
-        //        //if(connectAtom == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
-        //        //{
-        //        //    connectAtom.GetComponent<Renderer>().material.color = new Color(1, 0, 0, 1);
-        //        //} else
-        //        //{
-        //        //    connectAtom.setOriginalColor();
-        //        //}
-                
-        //        this.GetComponentInParent<GlobalCtrl>().createConnection(senden);
-        //        senden.Clear();
-        //    }
-        //    connectAtom = null;
-        //}
 
         //Clear
         m_currentAtom.m_ActiveHand = null;
@@ -248,70 +191,5 @@ public class GrabController : MonoBehaviour
         }
         return nearest;
     }
-
-    /*
-     * Is called if one atom is hold near another to check if a connection is possible between them
-     * 
-     * */
-    //public void checkConnection()
-    //{
-    //    if (!m_currentAtom)
-    //        return;
-    //    //Loop over all atoms
-    //    List<Atom> ctrl = GetComponentInParent<GlobalCtrl>().list_curAtoms;
-    //    foreach(Atom atom in ctrl)
-    //    {
-    //        //Checks distance between atoms
-    //        float distance = Vector3.Distance(atom.transform.position, m_currentAtom.transform.position);
-    //        if (distance <= GetComponentInParent<GlobalCtrl>().scale * 0.9f)
-    //        {
-    //            //Checks all connection points to see if they are already connected
-    //            bool alreadyConnected = false;
-    //            foreach(ConnectionStatus cs in atom.getAllConPoints())
-    //            {
-    //                if (cs.otherAtomID == m_currentAtom._id)
-    //                    alreadyConnected = true;
-    //            }
-    //            //If they aren't already connected, check for free connection point, if all points are alread connected no connection should be possible
-    //            if (atom != m_currentAtom && alreadyConnected == false)
-    //            {
-    //                bool connect1 = false;
-    //                bool connect2 = false;
-    //                foreach (ConnectionStatus con in atom.getAllConPoints())
-    //                {
-    //                    if (con.isConnected == false)
-    //                        connect1 = true;
-    //                }
-    //                foreach (ConnectionStatus con in m_currentAtom.getAllConPoints())
-    //                {
-    //                    if (con.isConnected == false)
-    //                        connect2 = true;
-    //                }
-    //                //If a connection is possible, mark atom green
-    //                if (connect1 && connect2)
-    //                {
-    //                    if (connectAtom != null)
-    //                    {
-    //                        if (connectAtom != atom)
-    //                        {
-    //                            connectAtom.setOriginalColor();
-    //                        }
-    //                    }
-    //                    //atom.GetComponent<Renderer>().material.color = new Color(0, 1, 0, 1);
-    //                    connectAtom = atom;
-    //                }
-    //            }
-    //        }
-    //        else
-    //        {
-    //            ////Reset color
-    //            //if (atom != GameObject.Find("atomworld").GetComponent<EditMode>().fixedAtom)
-    //            //{
-    //            //    atom.setOriginalColor();
-    //            //}
-    //        }
-    //    }
-    //}
-    
     
 }

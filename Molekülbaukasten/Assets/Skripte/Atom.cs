@@ -173,7 +173,6 @@ public class Atom : MonoBehaviour
     {
         if (collider.name.StartsWith("dummy") && this.name.StartsWith("dummy"))
         {
-            print("hier");
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision = false;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1 = null;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2 = null;

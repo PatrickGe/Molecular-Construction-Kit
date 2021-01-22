@@ -88,7 +88,7 @@ GameObject:
   - component: {fileID: 4360396755455108165}
   - component: {fileID: 1652169106996380792}
   m_Layer: 0
-  m_Name: VerbindungCC
+  m_Name: atomCon
   m_TagString: VerbindungCC
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
