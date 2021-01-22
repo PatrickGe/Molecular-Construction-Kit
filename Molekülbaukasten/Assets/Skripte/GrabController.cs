@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using Valve.VR;
 
@@ -16,11 +17,22 @@ public class GrabController : MonoBehaviour
     private Vector3 deltaPos;
     private Quaternion lastRotController;
     private Quaternion lastRotationMolecule;
-    
+
+    StreamWriter Log;
+    Logger1 logger;
+
     // Start is called before the first frame update
     void Start()
     {
+
         m_pose = GetComponent<SteamVR_Behaviour_Pose>();
+        //if(this.name == "Controller (left)")
+        //{
+        //    logger = new Logger1(@"C:\Users\vruser\Documents\Molecular-Construction-Kit\MyLog.log");
+        //    //Log = File.CreateText("totalLog.txt");
+        //    logger.WriteLine("Start");
+        //}
+
     }
 
     // Update is called once per frame
@@ -32,8 +44,9 @@ public class GrabController : MonoBehaviour
             Pickup();
         }
         //Trigger Up
+
         if (triggerklicked.GetStateUp(m_pose.inputSource))
-        {
+        {            
             Drop();
             isPressed = false;
         }
@@ -51,9 +64,13 @@ public class GrabController : MonoBehaviour
                 //Transform whole molecule or single atom depending on which mode is active
                 if(this.GetComponentInParent<GlobalCtrl>().allAtom)
                 {
-                    GameObject.Find("Molekül").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
-                    deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
-                    GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
+
+                    m_currentAtom.transform.parent.transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
+                    deltaPos = m_currentAtom.transform.parent.transform.position - m_currentAtom.transform.position;
+                    m_currentAtom.transform.parent.transform.position = transform.position + deltaPos;
+                    //GameObject.Find("Molekül").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
+                    //deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
+                    //GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
                 } else
                 {
                     m_currentAtom.transform.position = transform.position;
@@ -61,8 +78,6 @@ public class GrabController : MonoBehaviour
 
             }
         }
-        //Needed to connect 2 Atoms
-        checkConnection();
     }
 
 
@@ -95,27 +110,23 @@ public class GrabController : MonoBehaviour
         if (m_currentAtom.m_ActiveHand)
             m_currentAtom.m_ActiveHand.Drop();
 
-        deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
-        //Grab single atom which is not connected to the molecule
-        if (m_currentAtom != null && m_currentAtom.transform.parent == null)
+        deltaPos = GameObject.Find("atomworld").transform.position - m_currentAtom.transform.parent.transform.position;
+
+
+        //Transform whole molecule or single atom depending on which mode is active
+        if (this.GetComponentInParent<GlobalCtrl>().allAtom)
         {
-            m_currentAtom.transform.position = transform.position;
+            m_currentAtom.transform.parent.transform.position = transform.position + deltaPos;
         }
-        //Grab molecule
         else
         {
-            //Transform whole molecule or single atom depending on which mode is active
-            if (this.GetComponentInParent<GlobalCtrl>().allAtom)
-            {
-                GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
-            } else
-            {
-                m_currentAtom.transform.position = transform.position + deltaPos;
-            }
-                
+            m_currentAtom.transform.position = transform.position + deltaPos;
         }
+
+
+
         //Fix Rotation
-        lastRotationMolecule = GameObject.Find("Molekül").transform.rotation;
+        lastRotationMolecule = m_currentAtom.transform.parent.transform.rotation;
         lastPosController = transform.position;
         lastRotController = transform.rotation;
         isPressed = true;
@@ -127,28 +138,30 @@ public class GrabController : MonoBehaviour
         if (!m_currentAtom)
             return;
 
-        // Create connection
-        if (connectAtom != null)
+
+        if (transform.GetComponentInParent<GlobalCtrl>().collision)
         {
-            //If min. distance is reached
-            if (Vector3.Distance(connectAtom.transform.position, m_currentAtom.transform.position) <= GetComponentInParent<GlobalCtrl>().scale * 0.9f)
-            {
-                //Atoms are added to list
-                List<Atom> senden = new List<Atom>();
-                senden.Add(connectAtom);
-                senden.Add(m_currentAtom);
-                if(connectAtom == GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
-                {
-                    connectAtom.GetComponent<Renderer>().material.color = new Color(1, 0, 0, 1);
-                } else
-                {
-                    connectAtom.setOriginalColor();
-                }
-                
-                this.GetComponentInParent<GlobalCtrl>().createConnection(senden);
-                senden.Clear();
-            }
-            connectAtom = null;
+            List<int> conList = new List<int>();
+            conList.Add(GetComponentInParent<GlobalCtrl>().collider1.c0.otherAtomID);
+            conList.Add(GetComponentInParent<GlobalCtrl>().collider2.c0.otherAtomID);
+            conList.Add(GetComponentInParent<GlobalCtrl>().collider1.c0.otherPointID);
+            conList.Add(GetComponentInParent<GlobalCtrl>().collider2.c0.otherPointID);
+            GetComponentInParent<GlobalCtrl>().createConnection(conList);
+
+
+            GetComponentInParent<GlobalCtrl>().list_curAtoms.Remove(GetComponentInParent<GlobalCtrl>().collider1);
+            GetComponentInParent<GlobalCtrl>().list_curAtoms.Remove(GetComponentInParent<GlobalCtrl>().collider2);
+
+
+            Destroy(GetComponentInParent<GlobalCtrl>().collider1.gameObject);
+            Destroy(GetComponentInParent<GlobalCtrl>().collider2.gameObject);
+            Destroy(GameObject.Find("dummycon" + GetComponentInParent<GlobalCtrl>().collider1._id));
+            Destroy(GameObject.Find("dummycon" + GetComponentInParent<GlobalCtrl>().collider2._id));
+
+            GetComponentInParent<GlobalCtrl>().collision = false;
+            GetComponentInParent<GlobalCtrl>().collider1 = null;
+            GetComponentInParent<GlobalCtrl>().collider2 = null;
+            conList.Clear();
         }
 
         //Clear
@@ -178,70 +191,5 @@ public class GrabController : MonoBehaviour
         }
         return nearest;
     }
-
-    /*
-     * Is called if one atom is hold near another to check if a connection is possible between them
-     * 
-     * */
-    public void checkConnection()
-    {
-        if (!m_currentAtom)
-            return;
-        //Loop over all atoms
-        List<Atom> ctrl = GetComponentInParent<GlobalCtrl>().list_curAtoms;
-        foreach(Atom atom in ctrl)
-        {
-            //Checks distance between atoms
-            float distance = Vector3.Distance(atom.transform.position, m_currentAtom.transform.position);
-            if (distance <= GetComponentInParent<GlobalCtrl>().scale * 0.9f)
-            {
-                //Checks all connection points to see if they are already connected
-                bool alreadyConnected = false;
-                foreach(ConnectionStatus cs in atom.getAllConPoints())
-                {
-                    if (cs.otherAtomID == m_currentAtom._id)
-                        alreadyConnected = true;
-                }
-                //If they aren't already connected, check for free connection point, if all points are alread connected no connection should be possible
-                if (atom != m_currentAtom && alreadyConnected == false)
-                {
-                    bool connect1 = false;
-                    bool connect2 = false;
-                    foreach (ConnectionStatus con in atom.getAllConPoints())
-                    {
-                        if (con.isConnected == false)
-                            connect1 = true;
-                    }
-                    foreach (ConnectionStatus con in m_currentAtom.getAllConPoints())
-                    {
-                        if (con.isConnected == false)
-                            connect2 = true;
-                    }
-                    //If a connection is possible, mark atom green
-                    if (connect1 && connect2)
-                    {
-                        if (connectAtom != null)
-                        {
-                            if (connectAtom != atom)
-                            {
-                                connectAtom.setOriginalColor();
-                            }
-                        }
-                        atom.GetComponent<Renderer>().material.color = new Color(0, 1, 0, 1);
-                        connectAtom = atom;
-                    }
-                }
-            }
-            else
-            {
-                //Reset color
-                if (atom != GameObject.Find("Molekül").GetComponent<EditMode>().fixedAtom)
-                {
-                    atom.setOriginalColor();
-                }
-            }
-        }
-    }
-    
     
 }
