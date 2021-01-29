@@ -111,10 +111,10 @@ MonoBehaviour:
     y: 30
     width: 2560
     height: 1307
-  m_MinSize: {x: 583, y: 498}
-  m_MaxSize: {x: 12008, y: 14048}
+  m_MinSize: {x: 583, y: 348}
+  m_MaxSize: {x: 12008, y: 8048}
   vertical: 1
-  controlID: 46
+  controlID: 60
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -140,7 +140,7 @@ MonoBehaviour:
   m_MinSize: {x: 583, y: 224}
   m_MaxSize: {x: 12008, y: 4024}
   vertical: 0
-  controlID: 47
+  controlID: 61
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -240,14 +240,14 @@ MonoBehaviour:
     y: 915
     width: 2560
     height: 392
-  m_MinSize: {x: 230, y: 274}
-  m_MaxSize: {x: 10000, y: 10024}
-  m_ActualView: {fileID: 12}
+  m_MinSize: {x: 100, y: 124}
+  m_MaxSize: {x: 4000, y: 4024}
+  m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 12}
   - {fileID: 17}
-  m_Selected: 0
-  m_LastSelected: 1
+  m_Selected: 1
+  m_LastSelected: 0
 --- !u!114 &11
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -366,20 +366,20 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Skripte
+    - Assets/Prefabs
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/Skripte
+  - Assets/Prefabs
   m_LastFoldersGridSize: -1
   m_LastProjectPath: "C:\\Users\\vruser\\Documents\\Molecular-Construction-Kit\\Molek\xFClbaukasten"
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 5e370000
-    m_LastClickedID: 14174
-    m_ExpandedIDs: 00000000662b0000e22c0000342d0000402d0000842d0000002e0000ac2e0000ba2e0000402f0000e42f000086300000e6300000ea3200000a330000e0330000fe33000042340000ca340000d8350000c437000026380000fe460000004700000247000004470000064700000847000000ca9a3b
+    m_SelectedIDs: 36130000
+    m_LastClickedID: 4918
+    m_ExpandedIDs: 00000000b80e0000341000008610000092100000d610000052110000fe1100000c1200009212000036130000d8130000381400003c1600005c1600003217000050170000941700001c1800002a190000161b0000781b0000fc460000fe4600000047000002470000044700000647000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -407,7 +407,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000662b0000e22c0000342d0000402d0000842d0000002e0000ac2e0000ba2e0000402f0000e42f000086300000e6300000ea3200000a330000e0330000fe33000042340000ca340000d8350000c437000026380000fe4600000047000002470000044700000647000008470000
+    m_ExpandedIDs: 00000000b80e0000341000008610000092100000d610000052110000fe1100000c1200009212000036130000d8130000381400003c1600005c1600003217000050170000941700001c1800002a190000161b0000781b0000fc460000fe46000000470000024700000447000006470000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -491,9 +491,9 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: a2060000
+      m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: cefbffff
+      m_ExpandedIDs: 90bcffffa6bcffff8ebfffff40d6ffff70e9ffffd6fbffff102300001a240000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
