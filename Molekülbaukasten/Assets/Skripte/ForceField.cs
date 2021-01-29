@@ -46,7 +46,7 @@ public class ForceField : MonoBehaviour
     const float reqHH = 78f;
     const float reqHX = 50f;
 
-    const float kbCX = 10.0f;
+    const float kbCX = 6.0f;
     const float reqCX = 80f;
     // constants for angle terms
     float ka = 360.0f; // standard value (must be this large ... or even larger!)
@@ -60,7 +60,7 @@ public class ForceField : MonoBehaviour
     //                level = 1000 more details on forces
     //                level = 10000 maximum detail level
     StreamWriter FFlog;
-    const int LogLevel = 1000;
+    const int LogLevel = 000;
 
     // Start is called before the first frame update
     void Start()
@@ -218,10 +218,10 @@ public class ForceField : MonoBehaviour
                     else if (atomType[iAtom] == "C" && atomType[jAtom] == "DUMMY" ||
                              atomType[iAtom] == "DUMMY" && atomType[jAtom] == "C")
                     {
-                        //newBond.kBond = kbCX;
-                        //newBond.Req = reqCX;
-                        newBond.kBond = kbCH;
-                        newBond.Req = reqCH;
+                        newBond.kBond = kbCX;
+                        newBond.Req = reqCX;
+                        //newBond.kBond = kbCH;
+                        //newBond.Req = reqCH;
                     }
                     else if (atomType[iAtom] == "H" && atomType[jAtom] == "H")
                     {
@@ -231,10 +231,10 @@ public class ForceField : MonoBehaviour
                     else if (atomType[iAtom] == "H" && atomType[jAtom] == "DUMMY" ||
                              atomType[iAtom] == "DUMMY" && atomType[jAtom] == "H")
                     {
-                        //newBond.kBond = kbCX;
-                        //newBond.Req = reqHX;
-                        newBond.kBond = kb;
-                        newBond.Req = reqHH;
+                        newBond.kBond = kbCX;
+                        newBond.Req = reqHX;
+                        //newBond.kBond = kb;
+                        //newBond.Req = reqHH;
                     }
                     else // take defaults for the time being
                     {
@@ -317,7 +317,7 @@ public class ForceField : MonoBehaviour
     // in applyMovements, finally the actual objects are updated
     void applyFF()
     {
-        int nTimeSteps = 4;
+        int nTimeSteps = 6;
         for (int istep = 0; istep < nTimeSteps; istep++)
         {
             //Loop Bond List

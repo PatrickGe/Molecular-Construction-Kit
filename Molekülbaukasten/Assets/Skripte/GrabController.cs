@@ -151,7 +151,8 @@ public class GrabController : MonoBehaviour
 
             GetComponentInParent<GlobalCtrl>().list_curAtoms.Remove(GetComponentInParent<GlobalCtrl>().collider1);
             GetComponentInParent<GlobalCtrl>().list_curAtoms.Remove(GetComponentInParent<GlobalCtrl>().collider2);
-
+            m_Interactables.Remove(GetComponentInParent<GlobalCtrl>().collider1);
+            m_Interactables.Remove(GetComponentInParent<GlobalCtrl>().collider2);
 
             Destroy(GetComponentInParent<GlobalCtrl>().collider1.gameObject);
             Destroy(GetComponentInParent<GlobalCtrl>().collider2.gameObject);

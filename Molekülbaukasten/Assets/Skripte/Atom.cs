@@ -146,7 +146,7 @@ public class Atom : MonoBehaviour
         if(this.type == "C")
         {
             this.gameObject.GetComponent<Renderer>().material.color = new Color32(0, 0, 0, 1);
-        } else if(this.type == "H")
+        } else if(this.type == "H" || this.type == "DUMMY")
         {
             this.gameObject.GetComponent<Renderer>().material.color = new Color32(232, 232, 232, 1);
         }
@@ -166,6 +166,8 @@ public class Atom : MonoBehaviour
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision = true;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1 = collider.GetComponent<Atom>();
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2 = this.GetComponent<Atom>();
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1.GetComponent<Renderer>().material.color = Color.green;
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2.GetComponent<Renderer>().material.color = Color.green;
         }
     }
 
@@ -173,9 +175,12 @@ public class Atom : MonoBehaviour
     {
         if (collider.name.StartsWith("dummy") && this.name.StartsWith("dummy"))
         {
+            collider.gameObject.GetComponent<Atom>().setOriginalColor();
+            this.setOriginalColor();
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision = false;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1 = null;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2 = null;
+
         }
 
     }
