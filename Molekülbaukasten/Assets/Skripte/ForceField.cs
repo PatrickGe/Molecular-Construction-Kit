@@ -130,7 +130,14 @@ public class ForceField : MonoBehaviour
         {
             nAtoms++;
             atomList.Add(At._id);
-            atomMass.Add(At.mass);
+            
+            if (At.grabbed)
+            {
+                atomMass.Add(-1f);
+            } else
+            {
+                atomMass.Add(At.mass);
+            }
             atomType.Add(At.type);
             // Get atoms and scale to new unit system (in pm)
             position.Add((At.transform.localPosition*(1f/ scalingfactor)));

@@ -73,7 +73,8 @@ public class GrabController : MonoBehaviour
                     //GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
                 } else
                 {
-                    m_currentAtom.transform.position = transform.position;
+                    if(m_currentAtom != null)
+                        m_currentAtom.transform.position = transform.position;
                 }
 
             }
@@ -103,9 +104,11 @@ public class GrabController : MonoBehaviour
     public void Pickup()
     {
         m_currentAtom = GetNearestAtom();
+
         //Null check
         if (!m_currentAtom)
             return;
+        m_currentAtom.grabbed = true;
         // Already held, check
         if (m_currentAtom.m_ActiveHand)
             m_currentAtom.m_ActiveHand.Drop();
@@ -166,6 +169,7 @@ public class GrabController : MonoBehaviour
         }
 
         //Clear
+        m_currentAtom.grabbed = false;
         m_currentAtom.m_ActiveHand = null;
         m_currentAtom = null;
     }
@@ -183,12 +187,16 @@ public class GrabController : MonoBehaviour
 
         foreach(Atom interactable in m_Interactables)
         {
-            distance = (interactable.transform.position - transform.position).sqrMagnitude;
-            if(distance < minDistance)
+            if(interactable != null)
             {
-                minDistance = distance;
-                nearest = interactable;
+                distance = (interactable.transform.position - transform.position).sqrMagnitude;
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearest = interactable;
+                }
             }
+            
         }
         return nearest;
     }
