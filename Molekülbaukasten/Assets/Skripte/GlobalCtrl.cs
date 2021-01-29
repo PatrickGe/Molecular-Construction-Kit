@@ -137,29 +137,24 @@ public class GlobalCtrl : MonoBehaviour
         GameObject dummyatom = Instantiate(dummyprefab, new Vector3(0, 0, 0), Quaternion.identity);
         dummyatom.GetComponent<Atom>().f_InitDummy(_id, mainAtom._id, conID);
         Vector3 offset = new Vector3(0, 0.05f, 0);
-        //print("Main " + mainAtom.transform.position.x + "  " + mainAtom.transform.position.y + "  " + mainAtom.transform.position.z);
         if (conID == 0)
         {
-            dummyatom.transform.position = mainAtom.transform.localPosition + Quaternion.Euler(0, 0, 0) * offset/* * 0.738383f*/;
-            //print("ID0 " + dummyatom.transform.position.x + "  " + dummyatom.transform.position.y + "  " + dummyatom.transform.position.z);
+            dummyatom.transform.position = mainAtom.transform.localPosition + Quaternion.Euler(0, 0, 0) * offset;
         }
         else if(conID == 1)
         {
             dummyatom.transform.position = mainAtom.transform.localPosition + Quaternion.Euler(54.74f, 60, 180) * offset;
-            //print("ID1 " + dummyatom.transform.position.x + "  " + dummyatom.transform.position.y + "  " + dummyatom.transform.position.z);
         }
         else if(conID == 2)
         {
             dummyatom.transform.position = mainAtom.transform.localPosition + Quaternion.Euler(-54.74f, 0, 180) * offset;
-            //print("ID2 " + dummyatom.transform.position.x + "  " + dummyatom.transform.position.y + "  " + dummyatom.transform.position.z);
         }
         else if (conID == 3)
         {
             dummyatom.transform.position = mainAtom.transform.localPosition + Quaternion.Euler(-54.74f, 120, 180) * offset;
-            //print("ID3 " + dummyatom.transform.position.x + "  " + dummyatom.transform.position.y + "  " + dummyatom.transform.position.z);
         }
         
-        dummyatom.transform.localScale = new Vector3(scale * 0.1f, scale * 0.1f, scale * 0.1f);
+        dummyatom.transform.localScale = new Vector3(scale * 0.2f, scale * 0.2f, scale * 0.2f);
         list_curAtoms.Add(dummyatom.GetComponent<Atom>());
         dummyatom.transform.parent = mainAtom.transform.parent;
         mainAtom.getConPoint(conID).otherAtomID = dummyatom.GetComponent<Atom>()._id;

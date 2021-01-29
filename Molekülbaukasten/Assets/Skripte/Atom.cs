@@ -11,6 +11,7 @@ public class Atom : MonoBehaviour
     public bool isFull = false;
     public float mass;
     public string type;
+    public bool grabbed;
     private Vector3 l1Pos;
     private Vector3 l2Pos;
     private Vector3 r1Pos;
@@ -39,6 +40,7 @@ public class Atom : MonoBehaviour
         this.type = "DUMMY";
         this.name = "dummy" + _id;
         this.mass = 1;
+        this.grabbed = false;
         //ConnectionStatus conDummy = new ConnectionStatus();
         //conDummy.otherAtomID = atomid;
         //conDummy.otherPointID = conID;
@@ -61,7 +63,7 @@ public class Atom : MonoBehaviour
         this.type = "C";
         this.name = "atom" + _id;
         this.mass = 12f;
-
+        this.grabbed = false;
         //abstand = 1 / (Mathf.Sqrt(3));
         //l1Pos = new Vector3(-abstand, -abstand, -abstand);
         //l2Pos = new Vector3(abstand, -abstand, abstand);
@@ -72,7 +74,7 @@ public class Atom : MonoBehaviour
         //this.c1.transform.localPosition = l2Pos.normalized * transform.localScale.x * 3.5f;
         //this.c2.transform.localPosition = r1Pos.normalized * transform.localScale.x * 3.5f;
         //this.c3.transform.localPosition = r2Pos.normalized * transform.localScale.x * 3.5f;
-        
+
     }
 
     public void f_InitHydrogen(int id)
@@ -81,6 +83,7 @@ public class Atom : MonoBehaviour
         this.type = "H";
         this.name = "atom" + _id;
         this.mass = 1f;
+        this.grabbed = false;
         this.gameObject.GetComponent<Renderer>().material.color = new Color32(232, 232, 232, 1);
         this.c1.usable = false;
         this.c2.usable = false;
@@ -146,7 +149,7 @@ public class Atom : MonoBehaviour
         if(this.type == "C")
         {
             this.gameObject.GetComponent<Renderer>().material.color = new Color32(0, 0, 0, 1);
-        } else if(this.type == "H")
+        } else if(this.type == "H" || this.type == "DUMMY")
         {
             this.gameObject.GetComponent<Renderer>().material.color = new Color32(232, 232, 232, 1);
         }
@@ -166,6 +169,8 @@ public class Atom : MonoBehaviour
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision = true;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1 = collider.GetComponent<Atom>();
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2 = this.GetComponent<Atom>();
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1.GetComponent<Renderer>().material.color = Color.green;
+            GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2.GetComponent<Renderer>().material.color = Color.green;
         }
     }
 
@@ -173,9 +178,12 @@ public class Atom : MonoBehaviour
     {
         if (collider.name.StartsWith("dummy") && this.name.StartsWith("dummy"))
         {
+            collider.gameObject.GetComponent<Atom>().setOriginalColor();
+            this.setOriginalColor();
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collision = false;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider1 = null;
             GameObject.Find("Camera").GetComponent<GlobalCtrl>().collider2 = null;
+
         }
 
     }

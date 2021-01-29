@@ -107,7 +107,7 @@ namespace Valve.VR.Extras
             if (trackpadklicked.stateDown && bHit && touchPos.y >= 0.5)
             {
                 //Open an already saved molecule
-                if (hit.collider.name == "Öffnen" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                if (false && hit.collider.name == "Öffnen" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     GameObject.Find("Molekül").GetComponent<EditMode>().editMode = false;
@@ -120,7 +120,7 @@ namespace Valve.VR.Extras
                     guiLoad.SetActive(true);
                 }
                 //Save created molecule
-                else if (hit.collider.name == "Speichern" && guiSave.activeInHierarchy == false && (guiLoad.activeInHierarchy == false))
+                else if (false && hit.collider.name == "Speichern" && guiSave.activeInHierarchy == false && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     guiSave.SetActive(true);
@@ -150,7 +150,7 @@ namespace Valve.VR.Extras
                     this.GetComponentInParent<GlobalCtrl>().recycle();
                 }
                 //Mark an existing atom to edit / delete it
-                else if (hit.collider.name.StartsWith("atom") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
+                else if (false && hit.collider.name.StartsWith("atom") && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     //if it isn't selected before,start edit mode
