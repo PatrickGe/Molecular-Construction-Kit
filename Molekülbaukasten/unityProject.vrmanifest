@@ -2,13 +2,13 @@
   "source": "Unity",
   "applications": [
     {
-      "app_key": "application.generated.unity.molekülbaukasten.exe",
+      "app_key": "application.generated.unity.molecularconstructionkit.exe",
       "launch_type": "url",
       "url": "steam://launch/",
-      "action_manifest_path": "C:\\Users\\vruser\\Documents\\Molecular-Construction-Kit\\Molekülbaukasten\\Assets\\StreamingAssets\\SteamVR\\actions.json",
+      "action_manifest_path": "C:\\Users\\vruser\\Documents\\GitHub\\Molecular-Construction-Kit\\Molekülbaukasten\\Assets\\StreamingAssets\\SteamVR\\actions.json",
       "strings": {
         "en_us": {
-          "name": "Molekülbaukasten [Testing]"
+          "name": "Molecular Construction Kit [Testing]"
         }
       }
     }
