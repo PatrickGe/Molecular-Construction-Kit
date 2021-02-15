@@ -665,17 +665,11 @@
     <Reference Include="UnityEngine.TestRunner">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/UnityEngine.TestRunner.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.XR.Management">
-      <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.XR.Management.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Monetization">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/UnityEngine.Monetization.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Subsystem.Registration">
-      <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.Subsystem.Registration.dll</HintPath>
     </Reference>
     <Reference Include="com.unity.multiplayer-hlapi.Editor">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/com.unity.multiplayer-hlapi.Editor.dll</HintPath>
@@ -709,9 +703,6 @@
     </Reference>
     <Reference Include="UnityEngine.XR.LegacyInputHelpers">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.Management.Editor">
-      <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.XR.Management.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>

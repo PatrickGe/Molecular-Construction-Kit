@@ -252,7 +252,6 @@
     <Compile Include="Assets\Skripte\Auswahlgeste.cs" />
     <Compile Include="Assets\Skripte\CFileHelper.cs" />
     <Compile Include="Assets\Skripte\ConnectionStatus.cs" />
-    <Compile Include="Assets\Skripte\ControllerInteractions.cs" />
     <Compile Include="Assets\Skripte\EditMode.cs" />
     <Compile Include="Assets\Skripte\ForceField.cs" />
     <Compile Include="Assets\Skripte\GestenErkennung.cs" />
@@ -838,17 +837,11 @@
     <Reference Include="System.Xml.Serialization">
       <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.20f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/System.Xml.Serialization.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.XR.Management">
-      <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.XR.Management.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.Monetization">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/UnityEngine.Monetization.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Subsystem.Registration">
-      <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.Subsystem.Registration.dll</HintPath>
     </Reference>
     <Reference Include="com.unity.multiplayer-hlapi.Editor">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/com.unity.multiplayer-hlapi.Editor.dll</HintPath>
@@ -882,9 +875,6 @@
     </Reference>
     <Reference Include="UnityEngine.XR.LegacyInputHelpers">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/UnityEngine.XR.LegacyInputHelpers.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.Management.Editor">
-      <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.XR.Management.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
       <HintPath>C:/Users/vruser/Documents/GitHub/Molecular-Construction-Kit/Molekülbaukasten/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>

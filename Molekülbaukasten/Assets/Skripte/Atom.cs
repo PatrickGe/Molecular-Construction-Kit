@@ -41,13 +41,7 @@ public class Atom : MonoBehaviour
         this.name = "dummy" + _id;
         this.mass = 1;
         this.grabbed = false;
-        //ConnectionStatus conDummy = new ConnectionStatus();
-        //conDummy.otherAtomID = atomid;
-        //conDummy.otherPointID = conID;
-        //conDummy.isConnected = true;
-        //this.c1.gameObject.SetActive(false);
-        //this.c2.gameObject.SetActive(false);
-        //this.c3.gameObject.SetActive(false);
+
         this.c0.isConnected = true;
         this.c0.otherAtomID = atomid;
         this.c0.otherPointID = conID;
@@ -89,24 +83,6 @@ public class Atom : MonoBehaviour
         this.c2.usable = false;
         this.c3.usable = false;
     }
-
-    //public float getAngle(ConnectionStatus cx , ConnectionStatus cy)
-    //{
-    //    if ((cx == c0 && cy == c1) || (cy == c0 && cx == c1))
-    //        return c0c1;
-    //    else if ((cx == c0 && cy == c2) || (cy == c0 && cx == c2))
-    //        return c0c2;
-    //    else if ((cx == c0 && cy == c3) || (cy == c0 && cx == c3))
-    //        return c0c3;
-    //    else if ((cx == c1 && cy == c2) || (cy == c1 && cx == c2))
-    //        return c1c2;
-    //    else if ((cx == c1 && cy == c3) || (cy == c1 && cx == c3))
-    //        return c1c3;
-    //    else if ((cx == c2 && cy == c3) || (cy == c2 && cx == c3))
-    //        return c2c3;
-    //    else
-    //        return -1.0f;     
-    //}
 
     public ConnectionStatus getConPoint(int i)
     {
