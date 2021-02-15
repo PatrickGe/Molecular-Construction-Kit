@@ -120,16 +120,16 @@ namespace Valve.VR.Extras
                     guiLoad.SetActive(true);
                 }
                 //Save created molecule
-                else if (false && hit.collider.name == "Speichern" && guiSave.activeInHierarchy == false && (guiLoad.activeInHierarchy == false))
+                else if (hit.collider.name == "Speichern" && guiSave.activeInHierarchy == false && (guiLoad.activeInHierarchy == false))
                 {
                     vibration.Execute(0, 0.2f, 1, 1, this.pose.inputSource);
                     guiSave.SetActive(true);
-                    GameObject.Find("Molekül").GetComponent<EditMode>().editMode = false;
+                    //GameObject.Find("Molekül").GetComponent<EditMode>().editMode = false;
                     GameObject.Find("UI0").transform.position = new Vector3(0, 0, 0);
                     GameObject.Find("UI1").transform.position = new Vector3(0, 0, 0);
                     GameObject.Find("UI2").transform.position = new Vector3(0, 0, 0);
                     GameObject.Find("UI3").transform.position = new Vector3(0, 0, 0);
-                    GameObject.Find("Molekül").SetActive(false);
+                    //GameObject.Find("Molekül").SetActive(false);
                 }
                 //Create new carbon atom
                 else if (hit.collider.name == "PeriodensystemC" && (guiSave.activeInHierarchy == false) && (guiLoad.activeInHierarchy == false))

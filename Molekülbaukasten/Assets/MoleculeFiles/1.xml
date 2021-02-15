@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfMergedData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <mergedData>
+    <aData>
+      <atomData>
+        <id>6</id>
+        <type>C</type>
+        <pos>
+          <x>2.85776514E-06</x>
+          <y>7.50396157E-06</y>
+          <z>2.46881541E-06</z>
+        </pos>
+      </atomData>
+      <atomData>
+        <id>8</id>
+        <type>DUMMY</type>
+        <pos>
+          <x>2.609042E-06</x>
+          <y>7.323652E-06</y>
+          <z>2.32948332E-06</z>
+        </pos>
+      </atomData>
+      <atomData>
+        <id>9</id>
+        <type>DUMMY</type>
+        <pos>
+          <x>2.87391322E-06</x>
+          <y>7.43688861E-06</y>
+          <z>2.79901133E-06</z>
+        </pos>
+      </atomData>
+      <atomData>
+        <id>10</id>
+        <type>DUMMY</type>
+        <pos>
+          <x>3.15089778E-06</x>
+          <y>7.42258044E-06</y>
+          <z>2.32308071E-06</z>
+        </pos>
+      </atomData>
+      <atomData>
+        <id>1</id>
+        <type>C</type>
+        <pos>
+          <x>2.741194E-06</x>
+          <y>8.136829E-06</y>
+          <z>2.38195025E-06</z>
+        </pos>
+      </atomData>
+      <atomData>
+        <id>2</id>
+        <type>DUMMY</type>
+        <pos>
+          <x>3.03376555E-06</x>
+          <y>8.304108E-06</y>
+          <z>2.36749088E-06</z>
+        </pos>
+      </atomData>
+      <atomData>
+        <id>3</id>
+        <type>DUMMY</type>
+        <pos>
+          <x>2.57180636E-06</x>
+          <y>8.181432E-06</y>
+          <z>2.09366772E-06</z>
+        </pos>
+      </atomData>
+      <atomData>
+        <id>4</id>
+        <type>DUMMY</type>
+        <pos>
+          <x>2.55745545E-06</x>
+          <y>8.253716E-06</y>
+          <z>2.639564E-06</z>
+        </pos>
+      </atomData>
+    </aData>
+    <bData>
+      <bondData>
+        <bondRef>6 8</bondRef>
+      </bondData>
+      <bondData>
+        <bondRef>6 9</bondRef>
+      </bondData>
+      <bondData>
+        <bondRef>6 10</bondRef>
+      </bondData>
+      <bondData>
+        <bondRef>1 2</bondRef>
+      </bondData>
+      <bondData>
+        <bondRef>1 3</bondRef>
+      </bondData>
+      <bondData>
+        <bondRef>1 4</bondRef>
+      </bondData>
+      <bondData>
+        <bondRef>6 1</bondRef>
+      </bondData>
+    </bData>
+  </mergedData>
+</ArrayOfMergedData>

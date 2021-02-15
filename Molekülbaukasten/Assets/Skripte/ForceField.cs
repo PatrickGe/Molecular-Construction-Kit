@@ -76,6 +76,8 @@ public class ForceField : MonoBehaviour
         ;
         scalingfactor = GetComponent<GlobalCtrl>().scale / 154f;
         
+
+        // (Unity Koordinaten * scalingfaktor) / 100 = Angström
     }
     void OnApplicationQuit()
     {

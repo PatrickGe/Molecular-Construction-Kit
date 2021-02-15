@@ -44,15 +44,22 @@ public class CFileHelper
     {
         string path = fileName;
         Stream stream = File.Create(path);
+        var xmlWriterSettings = new XmlWriterSettings() { Indent = true };
         // Debug.Log("stream is open");
         // Convert the object to XML data and put it in the stream
-        XmlSerializer serializer = new XmlSerializer(data.GetType());    
-         using (XmlWriter writer = new XmlTextWriter(stream, Encoding.Unicode))
+        XmlSerializer serializer = new XmlSerializer(data.GetType());
+        using (XmlWriter writer = XmlWriter.Create(stream, xmlWriterSettings))
         {
             // Serialize using the XmlTextWriter. 
             serializer.Serialize(writer, data);
             writer.Close();
         }
+        //using (XmlWriter writer = new XmlTextWriter(stream, Encoding.Unicode))
+        //{
+        //    // Serialize using the XmlTextWriter. 
+        //    serializer.Serialize(writer, data);
+        //    writer.Close();
+        //}
 
 
 

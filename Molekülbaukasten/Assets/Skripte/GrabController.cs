@@ -68,9 +68,6 @@ public class GrabController : MonoBehaviour
                     m_currentAtom.transform.parent.transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
                     deltaPos = m_currentAtom.transform.parent.transform.position - m_currentAtom.transform.position;
                     m_currentAtom.transform.parent.transform.position = transform.position + deltaPos;
-                    //GameObject.Find("Molekül").transform.rotation = transform.rotation * Quaternion.Inverse(lastRotController) * lastRotationMolecule;
-                    //deltaPos = GameObject.Find("Molekül").transform.position - m_currentAtom.transform.position;
-                    //GameObject.Find("Molekül").transform.position = transform.position + deltaPos;
                 } else
                 {
                     if(m_currentAtom != null)

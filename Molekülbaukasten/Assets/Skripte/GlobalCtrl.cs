@@ -16,12 +16,27 @@ public struct connectInfo
 public struct atomData
 {
     public int id;
-    public connectInfo info0;
-    public connectInfo info1;
-    public connectInfo info2;
-    public connectInfo info3;
+    public string type;
     public Vector3 pos;
-    public Vector3 rot;
+}
+
+public struct bondData
+{
+    public string bondRef;
+    public string order;
+}
+
+public struct moleculeData
+{
+    public List<atomData> atomArray;
+    public List<bondData> bondArray;
+
+}
+
+public struct mergedData
+{
+    public List<atomData> aData;
+    public List<bondData> bData;
 }
 
 public class GlobalCtrl : MonoBehaviour
@@ -44,6 +59,8 @@ public class GlobalCtrl : MonoBehaviour
     private static int openSize = 0;
     private List<string> open = new List<string>();
     public List<atomData> list_atomData = new List<atomData>();
+    public List<bondData> list_bondData = new List<bondData>();
+    public List<mergedData> mergeList = new List<mergedData>();
     public List<Atom> list_curAtoms = new List<Atom>();
     public GameObject atomprefab;
     public GameObject dummyprefab;
@@ -176,6 +193,8 @@ public class GlobalCtrl : MonoBehaviour
         connection.transform.name = "dummycon" + dummyAtom._id;
         float distance = Vector3.Distance(mainAtom.transform.localPosition, dummyAtom.transform.localPosition);
         connection.transform.localScale = new Vector3(scale * 0.5f, scale * 0.5f, distance / 2);
+        connection.GetComponent<Bond>().atom1ID = mainAtom._id;
+        connection.GetComponent<Bond>().atom2ID = dummyAtom._id;
     }
 
     public void createCarbon(Vector3 pos)
@@ -248,7 +267,8 @@ public class GlobalCtrl : MonoBehaviour
         float distance = Vector3.Distance(conAtom1.transform.localPosition, conAtom0.transform.localPosition);
 
         connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, distance/2);
-
+        connection.GetComponent<Bond>().atom1ID = conAtom0._id;
+        connection.GetComponent<Bond>().atom2ID = conAtom1._id;
         //additional information is set, so each atom knows the id of it's connected atoms
         conAtom0.getConPoint(otherPoint0).otherAtomID = conAtom1._id;
         conAtom1.getConPoint(otherPoint1).otherAtomID = conAtom0._id;
@@ -257,116 +277,133 @@ public class GlobalCtrl : MonoBehaviour
 
     }
 
-    public List<atomData> saveMolecule()
+
+    public Vector3 scaleToAngst(Vector3 pos)
     {
-        // add each atom and it's information to the list, which is then saved as XML
-        foreach (Atom child in molecule.GetComponentsInChildren<Atom>())
+        Vector3 angstVec = (pos * (scale / 154f)) / 100f;
+
+        return angstVec;
+    }
+
+    public List<mergedData> saveMolecule()
+    {
+        mergedData m;
+        for (int i = 0; i < GameObject.Find("atomworld").transform.childCount; i++)
         {
-            atomData a;
-            a.id = child._id;
-            a.info0.isConnected = child.c0.isConnected;
-            a.info1.isConnected = child.c1.isConnected;
-            a.info2.isConnected = child.c2.isConnected;
-            a.info3.isConnected = child.c3.isConnected;
+            
+            foreach(Transform trans in GameObject.Find("atomworld").transform.GetChild(i))
+            {
+                if(trans.TryGetComponent(out Atom at))
+                {
+                    atomData a;
+                    a.id = at._id;
+                    a.type = at.type;
+                    a.pos = scaleToAngst(at.transform.localPosition);
+                    list_atomData.Add(a);
+                }
 
-            a.info0.otherAtomID = child.c0.otherAtomID;
-            a.info1.otherAtomID = child.c1.otherAtomID;
-            a.info2.otherAtomID = child.c2.otherAtomID;
-            a.info3.otherAtomID = child.c3.otherAtomID;
+                if (trans.TryGetComponent(out Bond bd))
+                {
+                    bondData b;
+                    b.bondRef = bd.generateRef2(bd.atom1ID, bd.atom2ID);
+                    b.order = "1";
+                    list_bondData.Add(b);
+                }
+            }
 
-            a.info0.otherPointID = child.c0.otherPointID;
-            a.info1.otherPointID = child.c1.otherPointID;
-            a.info2.otherPointID = child.c2.otherPointID;
-            a.info3.otherPointID = child.c3.otherPointID;
-            a.pos = child.transform.position;
-            a.rot = child.transform.eulerAngles;
-            list_atomData.Add(a);
+            //list_atomData.Clear();
+            //list_bondData.Clear();
         }
 
-        return list_atomData;
+        m.aData = list_atomData;
+        m.bData = list_bondData;
+
+        mergeList.Add(m);
+
+        return mergeList;
     }
 
     public void loadMolecule(List<atomData> list)
     {
-        _conID = 0;
-        //reset molecule
-        loadGUI = false;
-        molecule.SetActive(true);
-        GameObject.Find("GUILoad").SetActive(false);
-        destroyMolecule();
-        list_curAtoms.Clear();
-        //get the atom data for each atom in the saved list and instantiate the atoms with their data
-        foreach (atomData atom in list)
-        {
-            GameObject atomObj = Instantiate(atomprefab, atom.pos, Quaternion.Euler(atom.rot));
-            Atom atomDef = atomObj.GetComponent<Atom>();
-            //NEEDS REWORK HERE BECAUSE OF NEW ATOM STRUCTURE
+    //    _conID = 0;
+    //    //reset molecule
+    //    loadGUI = false;
+    //    molecule.SetActive(true);
+    //    GameObject.Find("GUILoad").SetActive(false);
+    //    destroyMolecule();
+    //    list_curAtoms.Clear();
+    //    //get the atom data for each atom in the saved list and instantiate the atoms with their data
+    //    foreach (atomData atom in list)
+    //    {
+    //        GameObject atomObj = Instantiate(atomprefab, atom.pos, Quaternion.Euler(atom.rot));
+    //        Atom atomDef = atomObj.GetComponent<Atom>();
+    //        //NEEDS REWORK HERE BECAUSE OF NEW ATOM STRUCTURE
 
-            //atomDef.f_Init(atom.id);
-            atomDef.transform.parent = GameObject.Find("Molekül").transform;
-            atomDef.c0.isConnected = atom.info0.isConnected;
-            atomDef.c1.isConnected = atom.info1.isConnected;
-            atomDef.c2.isConnected = atom.info2.isConnected;
-            atomDef.c3.isConnected = atom.info3.isConnected;
+    //        //atomDef.f_Init(atom.id);
+    //        atomDef.transform.parent = GameObject.Find("Molekül").transform;
+    //        atomDef.c0.isConnected = atom.info0.isConnected;
+    //        atomDef.c1.isConnected = atom.info1.isConnected;
+    //        atomDef.c2.isConnected = atom.info2.isConnected;
+    //        atomDef.c3.isConnected = atom.info3.isConnected;
 
-            atomDef.c0.otherAtomID = atom.info0.otherAtomID;
-            atomDef.c1.otherAtomID = atom.info1.otherAtomID;
-            atomDef.c2.otherAtomID = atom.info2.otherAtomID;
-            atomDef.c3.otherAtomID = atom.info3.otherAtomID;
+    //        atomDef.c0.otherAtomID = atom.info0.otherAtomID;
+    //        atomDef.c1.otherAtomID = atom.info1.otherAtomID;
+    //        atomDef.c2.otherAtomID = atom.info2.otherAtomID;
+    //        atomDef.c3.otherAtomID = atom.info3.otherAtomID;
 
-            atomDef.c0.otherPointID = atom.info0.otherPointID;
-            atomDef.c1.otherPointID = atom.info1.otherPointID;
-            atomDef.c2.otherPointID = atom.info2.otherPointID;
-            atomDef.c3.otherPointID = atom.info3.otherPointID;
-            list_curAtoms.Add(atomDef);
-            foreach(ConnectionStatus c in atomDef.getAllConPoints())
-            {
-                c.conID = -1;
-            }
-        }
+    //        atomDef.c0.otherPointID = atom.info0.otherPointID;
+    //        atomDef.c1.otherPointID = atom.info1.otherPointID;
+    //        atomDef.c2.otherPointID = atom.info2.otherPointID;
+    //        atomDef.c3.otherPointID = atom.info3.otherPointID;
+    //        list_curAtoms.Add(atomDef);
+    //        foreach(ConnectionStatus c in atomDef.getAllConPoints())
+    //        {
+    //            c.conID = -1;
+    //        }
+    //    }
 
-        //loop all atoms and their connections, if they have a connection --> create it
-        int tempID = 0;
-        foreach (Atom atom in list_curAtoms)
-        {
-            foreach (ConnectionStatus cp in atom.getAllConPoints())
-            {
-                if (cp.isConnected == true)
-                {
+    //    //loop all atoms and their connections, if they have a connection --> create it
+    //    int tempID = 0;
+    //    foreach (Atom atom in list_curAtoms)
+    //    {
+    //        foreach (ConnectionStatus cp in atom.getAllConPoints())
+    //        {
+    //            if (cp.isConnected == true)
+    //            {
                     
-                    // find connected atom: Find atom p, where p.id = otherAtomID
-                    otherAtom = list_curAtoms.Find(p=>p._id==cp.otherAtomID);
-                    otherCP = otherAtom.getConPoint(cp.otherPointID);
-                    //if the connection hasn't already been created in the same loop because it was part of the "other atom" before, create it now
-                    if (cp.conID == -1)
-                    {
-                        _conID += 1;
-                        GameObject connection = Instantiate(atomcon, atom.transform.position, Quaternion.identity);
-                        connection.transform.LookAt(otherAtom.transform.position);
-                        connection.transform.parent = GameObject.Find("Molekül").transform;
-                        connection.transform.name = "con" + _conID;
-                        float distance = Vector3.Distance(atom.transform.position, otherAtom.transform.position);
-                        connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, connection.transform.localScale.z + ((distance - 0.35f) * 1));
-                        cp.conID = _conID;
-                        otherCP.conID = _conID;
-                        cp.gameObject.SetActive(false);
-                        otherCP.gameObject.SetActive(false);
-                    }
-                }
-                // set full attribute if needed
-                if (atom.c0.isConnected == true && atom.c1.isConnected == true && atom.c2.isConnected == true && atom.c3.isConnected == true)
-                {
-                    atom.isFull = true;
-                }
-            }
-            // update atomID
-            if(atom._id > tempID)
-            {
-                tempID = atom._id;
-            }
-        }
-        //replace atom ID, if a new atom is created now, the ID starts at _id+1, so that each atomID is unique
-        _id = tempID;
+    //                // find connected atom: Find atom p, where p.id = otherAtomID
+    //                otherAtom = list_curAtoms.Find(p=>p._id==cp.otherAtomID);
+    //                otherCP = otherAtom.getConPoint(cp.otherPointID);
+    //                //if the connection hasn't already been created in the same loop because it was part of the "other atom" before, create it now
+    //                if (cp.conID == -1)
+    //                {
+    //                    _conID += 1;
+    //                    GameObject connection = Instantiate(atomcon, atom.transform.position, Quaternion.identity);
+    //                    connection.transform.LookAt(otherAtom.transform.position);
+    //                    connection.transform.parent = GameObject.Find("Molekül").transform;
+    //                    connection.transform.name = "con" + _conID;
+    //                    float distance = Vector3.Distance(atom.transform.position, otherAtom.transform.position);
+    //                    connection.transform.localScale = new Vector3(connection.transform.localScale.x, connection.transform.localScale.y, connection.transform.localScale.z + ((distance - 0.35f) * 1));
+    //                    cp.conID = _conID;
+    //                    otherCP.conID = _conID;
+    //                    cp.gameObject.SetActive(false);
+    //                    otherCP.gameObject.SetActive(false);
+    //                }
+    //            }
+    //            // set full attribute if needed
+    //            if (atom.c0.isConnected == true && atom.c1.isConnected == true && atom.c2.isConnected == true && atom.c3.isConnected == true)
+    //            {
+    //                atom.isFull = true;
+    //            }
+    //        }
+    //        // update atomID
+    //        if(atom._id > tempID)
+    //        {
+    //            tempID = atom._id;
+    //        }
+    //    }
+    //    //replace atom ID, if a new atom is created now, the ID starts at _id+1, so that each atomID is unique
+    //    _id = tempID;
     }
 
     public void loadGUILoad()
@@ -418,12 +455,14 @@ public class GlobalCtrl : MonoBehaviour
         else if (s == "OK")
         {
             list_atomData.Clear();
-            saveMolecule();
-            CFileHelper.SaveData(Application.dataPath + "/MoleculeFiles/" + changingText.text + ".xml", list_atomData);
+            list_bondData.Clear();
+            mergeList.Clear();
+
+            CFileHelper.SaveData(Application.dataPath + "/MoleculeFiles/" + changingText.text + ".xml", saveMolecule());
 
             changingText.text = "Name eingeben";
             GameObject.Find("GUISave").SetActive(false);
-            molecule.SetActive(true);
+            //molecule.SetActive(true);
         }
         else
         {
