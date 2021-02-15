@@ -34,7 +34,8 @@ public class ForceField : MonoBehaviour
     // note that the forcefield works in the atomic scale (i.e. all distances measure in pm)
     // we scale back when applying the movements to the actual objects
     float scalingfactor;
-    float timeFactor = 0.25f;
+    float timeFactor = (1f/15f);  // might be done more elegantly: timeFactor = totalTimePerFrame/nTimeSteps
+    int nTimeSteps = 15;
 
     // constants for bond terms
     const float kb = 3.0f;    // standard value
@@ -324,7 +325,6 @@ public class ForceField : MonoBehaviour
     // in applyMovements, finally the actual objects are updated
     void applyFF()
     {
-        int nTimeSteps = 6;
         for (int istep = 0; istep < nTimeSteps; istep++)
         {
             //Loop Bond List
