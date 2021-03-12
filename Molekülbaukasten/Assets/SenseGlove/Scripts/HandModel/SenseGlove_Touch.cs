@@ -125,8 +125,8 @@ public class SenseGlove_Touch : MonoBehaviour
                             GlobalCtrl.updown -= 1;
                         } else if (this.touchedObject.name.StartsWith("Platz"))
                         {
-                            List<atomData> loadFile = new List<atomData>();
-                            loadFile = (List<atomData>)CFileHelper.LoadData(Application.dataPath + "/MoleculeFiles/" + touchedObject.transform.GetChild(0).GetComponent<Text>().text, typeof(List<atomData>));
+                            List<molecule> loadFile = new List<molecule>();
+                            loadFile = (List<molecule>)CFileHelper.LoadData(Application.dataPath + "/MoleculeFiles/" + touchedObject.transform.GetChild(0).GetComponent<Text>().text, typeof(List<molecule>));
                             this.transform.root.GetComponent<GlobalCtrl>().loadMolecule(loadFile);
                         } else if (this.touchedObject.name == "ExitLoadGui")
                         {

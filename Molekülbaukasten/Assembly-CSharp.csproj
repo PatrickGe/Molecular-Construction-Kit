@@ -261,10 +261,13 @@
     <Compile Include="Assets\Skripte\LaserPointer.cs" />
     <Compile Include="Assets\Skripte\Logger1.cs" />
     <Compile Include="Assets\Skripte\VerknüpfungAtome.cs" />
+    <None Include="Assets\MoleculeFiles\T2.xml" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Overlay.shader" />
+    <None Include="Assets\MoleculeFiles\TEST.xml" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap.shader" />
     <None Include="Assets\SenseGlove\Data\UserProfiles.txt" />
+    <None Include="Assets\MoleculeFiles\10.xml" />
     <None Include="Assets\SenseGlove\Materials\Shaders\Hologram.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\Skripte\ForceFieldOld.cs.deact.txt" />
@@ -283,8 +286,10 @@
     <None Include="Assets\MoleculeFiles\4.xml" />
     <None Include="Assets\SenseGlove\Documentation\ChangeLog.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Masking.shader" />
+    <None Include="Assets\MoleculeFiles\C2H1.xml" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\MoleculeFiles\9.xml" />
     <None Include="Assets\HTC.UnityPlugin\ViveInputUtility\Resources\Unlit-AlphaWithFade.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_Sprite.shader" />
