@@ -1,7 +1,7 @@
 # Molecular Construction Kit
 This molecular construction kit allows the user to build simple molecules consisting of carbon and hydrogen atoms. Different atoms will follow in the future. The program is used with the HTC VIVE and the corresponding controllers. Created molecules can be saved and exported as an XML file to use them again.
 
-The basic program was once created for use with the SenseGlove and part of my Bachelor Thesis, future updates will only support the VIVE Controllers and can be seen here: [MolecularVR](https://github.com/PatrickGe/MolecularVR).
+The basic program was once created for use with the SenseGlove and part of my [Bachelor Thesis](https://github.com/PatrickGe/Molecular-Construction-Kit/blob/master/Gebhardt_Entwicklung%20eines%20SenseGlove%20-%20basierten%20Programms%20zur%20Erstellung%20und%20Manipulation%20von%20Molek%C3%BClmodellen.pdf), future updates will only support the VIVE Controllers and can be seen here: [MolecularVR](https://github.com/PatrickGe/MolecularVR).
 
 ## Controls
 ### Laserpointer
